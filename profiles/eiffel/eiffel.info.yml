@@ -38,10 +38,10 @@ dependencies:
   - views_ui
   - tour
   - automated_cron
-  - blog
 themes:
   - bartik
   - seven
+  - drupal8_zymphonies_theme
 # Information added by Drupal.org packaging script on 2017-10-04
 version: '8.4.0'
 core: '8.x'
