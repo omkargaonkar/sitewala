@@ -21,14 +21,4 @@ if (file_exists($local_settings)) {
   include $local_settings;
 }
 $settings['install_profile'] = 'eiffel';
-$databases['default']['default'] = array (
-  'database' => 'sitewala',
-  'username' => 'root',
-  'password' => 'password',
-  'prefix' => '',
-  'host' => 'localhost',
-  'port' => '3306',
-  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-  'driver' => 'mysql',
-);
 $settings['hash_salt'] = '3SY8_OWG4hqA4wqYViBmj3VuBpIexoYL3k90j6KmAwD_LU8aY-Q7ON2rxHAsn6oj5ogk_7Oqqw';
