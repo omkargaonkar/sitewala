@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: delius_blog
+label: 'Delius blog'
+font_url: 'http://www.google.com/webfonts/family?family=Delius Unicase&subset=latin#700'
+fallback: ''
+selectors: '.fontyourface h1, .fontyourface h2, .fontyourface h3, .fontyourface h4, .fontyourface h5, .fontyourface h6'
+theme: paxton

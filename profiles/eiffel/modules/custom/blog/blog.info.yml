@@ -1,16 +1,16 @@
-name: blog
-description: 'Provides blog content type and related configuration. '
+name: Blog
+description: 'Provides Blog content type and related configuration. '
 type: module
 core: 8.x
+project: 'blog'
 dependencies:
-  - block
   - comment
   - field
+  - file
+  - fontyourface
   - image
   - menu_ui
   - node
   - path
-  - system
   - text
   - user
-version: 8.x-1.0

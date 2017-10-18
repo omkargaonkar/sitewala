@@ -2,10 +2,9 @@ langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_display.comment.comment.default
     - field.field.node.blog.body
-    - field.field.node.blog.field_cooment
-    - field.field.node.blog.field_image
+    - field.field.node.blog.field_blog_image
+    - field.field.node.blog.field_comments
     - node.type.blog
   module:
     - comment
@@ -20,21 +19,12 @@ content:
   body:
     label: hidden
     type: text_default
-    weight: 3
+    weight: 1
     settings: {  }
     third_party_settings: {  }
     region: content
-  field_cooment:
-    weight: 1
-    label: above
-    settings:
-      view_mode: default
-      pager_id: 0
-    third_party_settings: {  }
-    type: comment_default
-    region: content
-  field_image:
-    weight: 0
+  field_blog_image:
+    weight: 2
     label: above
     settings:
       image_style: ''
@@ -42,8 +32,17 @@ content:
     third_party_settings: {  }
     type: image
     region: content
+  field_comments:
+    weight: 3
+    label: above
+    settings:
+      view_mode: default
+      pager_id: 0
+    third_party_settings: {  }
+    type: comment_default
+    region: content
   links:
-    weight: 2
+    weight: 0
     region: content
     settings: {  }
     third_party_settings: {  }

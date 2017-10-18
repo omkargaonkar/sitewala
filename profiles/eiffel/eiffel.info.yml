@@ -38,6 +38,7 @@ dependencies:
   - views_ui
   - tour
   - automated_cron
+  - blog
 themes:
   - bartik
   - seven

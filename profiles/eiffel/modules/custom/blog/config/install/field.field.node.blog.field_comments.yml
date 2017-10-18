@@ -2,15 +2,15 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.storage.node.field_cooment
+    - field.storage.node.field_comments
     - node.type.blog
   module:
     - comment
-id: node.blog.field_cooment
-field_name: field_cooment
+id: node.blog.field_comments
+field_name: field_comments
 entity_type: node
 bundle: blog
-label: Comment
+label: Comments
 description: ''
 required: false
 translatable: false

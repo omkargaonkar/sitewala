@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+id: aladin_blog
+label: 'Aladin blog'
+font_url: 'http://www.google.com/webfonts/family?family=Aladin&subset=latin#regular'
+fallback: ''
+selectors: .fontyourface
+theme: paxton
