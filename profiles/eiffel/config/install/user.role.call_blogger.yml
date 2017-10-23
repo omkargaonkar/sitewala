@@ -1,0 +1,13 @@
+uuid: 4af06445-3c43-4307-a86d-b9242b6fb8ca
+langcode: en
+status: true
+dependencies: {  }
+id: call_blogger
+label: 'call blogger'
+weight: 3
+is_admin: null
+permissions:
+  - 'create blog content'
+  - 'delete own blog content'
+  - 'edit own blog content'
+  - 'edit own comments'
