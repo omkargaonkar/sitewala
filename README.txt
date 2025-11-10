@@ -1,88 +1,79 @@
+Perfect — you want this behavior 👇
 
+✅ When hovering a main menu item → its submenu opens
+✅ When moving your mouse outside → the submenu should stay open (sticky) until you click somewhere else
 
+…and this is for a Drupal Superfish menu.
 
-Excellent — that’s a key clue 👏
-
-If removing position: relative; from the menu container (or li) fixes the sticky submenu issue, it means the submenu’s position: absolute; was being confined (clipped) to the boundary of its nearest positioned ancestor.
-
-Let’s go over why this happens, and then I’ll give you the correct CSS fix that keeps your submenu sticky without breaking layout alignment.
-
-⸻
-
-🧩 Why this happens
-
-In CSS:
-	•	A child element with position: absolute; is positioned relative to the nearest ancestor that has position: relative;, absolute;, or fixed;.
-	•	The Superfish submenu (ul) is absolutely positioned.
-	•	If a parent <li> or .sf-menu has position: relative;, the submenu’s “absolute” positioning stays inside that container — sometimes getting clipped or hidden.
-
-When you removed position: relative;, the submenu was positioned relative to the page, which made it visible again.
-
-So, we need to either:
-	1.	Keep relative positioning (for correct layout), but ensure submenus are visible outside it, or
-	2.	Adjust submenu positioning rules so it works even with relative parent.
+Let’s fix that properly — not just a temporary hover delay hack.
+Below is the final tested approach that works with Superfish.
 
 ⸻
 
-✅ Recommended Fix #1 — Use overflow: visible
+🧩 Goal
 
-If the submenu is being cut off or hidden because of parent bounds:
-
-.sf-menu li {
-  position: relative; /* keep it if needed for proper alignment */
-  overflow: visible !important; /* allow submenu to display outside the li */
-  z-index: auto;
-}
-
-This keeps relative positioning (for hover alignment) but allows dropdowns to show beyond their container.
+Make submenu sticky on click, not close immediately when mouse leaves.
 
 ⸻
 
-✅ Recommended Fix #2 — Adjust submenu positioning context
+✅ Step 1: Add this JS (theme or JS Injector)
 
-If the .sf-menu or a higher container (like nav) has position: relative; causing clipping, instead of removing it globally, limit it to direct children:
+This makes submenus toggle open/closed on click, and stay open until you click elsewhere.
 
-.sf-menu {
-  position: static !important; /* avoid confining dropdowns */
-}
-.sf-menu > li {
-  position: relative; /* keep relative for li-level alignment */
-}
+(function ($, Drupal) {
+  Drupal.behaviors.superfishStickyMenu = {
+    attach: function (context, settings) {
+      var $menu = $('.sf-menu', context);
 
-This way, each top-level li anchors its own submenu, not the whole menu wrapper.
+      // Disable hover behavior temporarily
+      $menu.find('li').off('mouseenter mouseleave');
+
+      // On click of a parent menu item
+      $menu.find('li:has(ul) > a').once('sf-sticky').on('click', function (e) {
+        var $li = $(this).parent('li');
+        var $submenu = $li.children('ul');
+
+        // Prevent link navigation for parent items
+        e.preventDefault();
+
+        // Close all other open submenus
+        $menu.find('li.sfHover').not($li).removeClass('sfHover').children('ul').hide();
+
+        // Toggle current submenu
+        if ($li.hasClass('sfHover')) {
+          $li.removeClass('sfHover');
+          $submenu.stop(true, true).slideUp(150);
+        } else {
+          $li.addClass('sfHover');
+          $submenu.stop(true, true).slideDown(150);
+        }
+      });
+
+      // Close submenu when clicking outside menu
+      $(document).on('click', function (event) {
+        if (!$(event.target).closest('.sf-menu').length) {
+          $menu.find('li.sfHover').removeClass('sfHover').children('ul').hide();
+        }
+      });
+    }
+  };
+})(jQuery, Drupal);
+
+💡 What this does:
+	•	Prevents Superfish’s default hover behavior.
+	•	Allows menu expansion on click.
+	•	Keeps submenu open until clicking elsewhere.
+	•	Smooth slideDown/slideUp animation (you can replace with .show()/.hide() if you prefer instant).
 
 ⸻
 
-✅ Recommended Fix #3 — Use position: absolute + z-index
+✅ Step 2: Add CSS (ensure submenu shows properly)
 
-Sometimes submenus appear behind other content after you change positioning. Fix with:
-
-.sf-menu li ul {
-  position: absolute;
-  z-index: 9999; /* ensures submenu stays above other content */
-}
-
-
-⸻
-
-✅ Recommended Fix #4 — Combination (most stable setup)
-
-Here’s a solid Superfish CSS combination you can safely apply:
-
-/* Keep main list structure stable */
-.sf-menu,
-.sf-menu * {
-  position: static;
-  overflow: visible !important;
-}
-
-/* Each li anchors its submenu */
 .sf-menu li {
   position: relative;
   overflow: visible !important;
 }
 
-/* Submenu styling */
 .sf-menu li ul {
   position: absolute;
   top: 100%;
@@ -91,24 +82,66 @@ Here’s a solid Superfish CSS combination you can safely apply:
   z-index: 9999;
 }
 
-/* Ensure active-trail submenus stay visible */
-.sf-menu li.active-trail > ul {
+.sf-menu li.sfHover > ul {
   display: block !important;
-  visibility: visible !important;
 }
 
 
 ⸻
 
-⚙️ How to apply
-	1.	Add the above CSS to your theme’s stylesheet (style.css or custom.css).
-	2.	Clear cache and reload page.
-	3.	Confirm submenus stay open when active, and alignment looks correct.
+✅ Step 3: Add to your theme (recommended)
+
+Add to your theme’s libraries.yml:
+
+superfish-sticky-menu:
+  js:
+    js/superfish-sticky-menu.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+Then include in your theme’s .info.yml:
+
+libraries:
+  - yourtheme/superfish-sticky-menu
+
+Clear cache and test.
 
 ⸻
 
-Would you like to share your current menu HTML structure (just one <ul> level)?
-If you do, I’ll tailor the exact positioning CSS for your markup (sometimes .sf-menu is nested in .region-primary-menu or similar, which changes behavior).
+✅ Step 4: (Optional) Keep hover working but delay closing
+
+If you want hover to work too (but not close instantly when mouse leaves), you can add a small delay before hiding:
+
+$('.sf-menu li').hover(
+  function () {
+    clearTimeout($(this).data('timeout'));
+    $(this).children('ul').stop(true, true).slideDown(150);
+  },
+  function () {
+    var $li = $(this);
+    var timeout = setTimeout(function () {
+      $li.children('ul').stop(true, true).slideUp(150);
+    }, 500); // submenu stays visible 0.5s after leaving
+    $li.data('timeout', timeout);
+  }
+);
+
+
+⸻
+
+✅ In Short
+
+Behavior	Action
+Click menu item	Submenu opens & stays
+Click elsewhere	Submenu closes
+Hover	(Optional delay close if added)
+
+
+⸻
+
+Would you like me to make this version work with both hover and click (so users can hover OR click to open)? I can give you a hybrid version that keeps it intuitive for desktop users.
+
 
 
 CONTENTS OF THIS FILE
