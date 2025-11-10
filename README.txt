@@ -1,47 +1,32 @@
-/* ---- Fix: Make social media links responsive at 200% zoom ---- */
-.social-media-links,
-.social-media-links--platforms {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem; /* add spacing between icons */
+/* --- Fix AddToAny buttons layout and accessibility --- */
+.a2a_kit,
+.a2a_floating_style,
+.a2a_default_style {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem;
   max-width: 100%;
   overflow: visible !important;
 }
 
-/* ---- Fix: Icons should scale with text ---- */
-.social-media-links__icon {
-  width: 1.5em;   /* relative to text size, scales with zoom */
-  height: 1.5em;
-  min-width: 24px;
-  min-height: 24px;
-}
-
-/* ---- Ensure icons do not clip or overlap ---- */
-.social-media-links__platform,
-.social-media-links__link {
-  display: inline-flex;
+.a2a_button_facebook,
+.a2a_button_twitter,
+.a2a_button_linkedin,
+.a2a_button_email,
+.a2a_button_whatsapp {
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  width: 1.5em !important;
+  height: 1.5em !important;
 }
 
-/* ---- Prevent hidden overflow ---- */
-.block-social-media-links,
-.region-footer,
-.region-social {
-  overflow: visible !important;
-}
-
-/* ---- Optional: stack icons when space is limited ---- */
 @media (max-width: 1280px) {
-  .social-media-links--platforms {
+  .a2a_kit {
     flex-direction: row;
     flex-wrap: wrap;
   }
 }
-
 
 CONTENTS OF THIS FILE
 ---------------------
