@@ -1,79 +1,13 @@
-
-Perfect 👍 — here’s the ready-to-use version you can directly paste into Drupal’s JS Injector and CSS Injector (no theme file editing needed).
-This will make the submenu stay open after page navigation (for example, when you click “Paying It Safe”).
-
-⸻
-
-🧩 Step 1 – JS Injector Code
-
-Paste this entire block into the “JavaScript Injector” (set it to run on all pages):
-
-(function ($) {
-  $(document).ready(function () {
-    // Run after Superfish finishes initializing
-    setTimeout(function () {
-      $('.sf-menu li.active-trail').each(function () {
-        var $li = $(this);
-
-        // Add Superfish hover class so submenu displays
-        $li.addClass('sfHover');
-
-        // Force submenu visible
-        $li.children('ul').css({
-          display: 'block',
-          visibility: 'visible',
-          opacity: 1
-        });
-      });
-    }, 200); // small delay ensures Superfish is loaded
-  });
-})(jQuery);
-
-✅ What it does
-	•	Waits for page load.
-	•	Finds .active-trail menu items.
-	•	Opens their submenus automatically and keeps them visible.
-
-⸻
-
-🎨 Step 2 – CSS Injector Code
-
-Paste this into CSS Injector (applies globally):
-
-/* Keep submenu for the active menu trail visible */
-.sf-menu li.active-trail > ul,
-.sf-menu li.active-trail.sfHover > ul {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-/* Make sure dropdowns aren’t hidden by parent overflow */
-.sf-menu li {
-  position: relative;
-  overflow: visible !important;
+.social-links a {
+  flex: 0 0 auto;
+  max-width: 100%;
 }
-
-/* Ensure submenu stays on top of page content */
-.sf-menu li ul {
-  position: absolute;
-  z-index: 9999;
-}
-
-
-⸻
-
-⚙️ Step 3 – Clear caches & test
-	1.	Save both injectors.
-	2.	Run Configuration → Performance → Clear all caches (or drush cr).
-	3.	Reload your site and click Paying It Safe —
-✅ The page loads, and
-✅ Its submenu should stay expanded automatically.
-
-⸻
-
-If you’d like, I can extend this so the submenu also stays open when clicking any of its child links (so it doesn’t collapse when you navigate inside that section).
-Would you like that version too?
 
 
 CONTENTS OF THIS FILE
