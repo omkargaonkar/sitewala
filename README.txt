@@ -1,14 +1,38 @@
 
+
 (function ($) {
-  Drupal.behaviors.superfishActiveTrail = {
-    attach: function (context, settings) {
-      // Ensure active trail parent menus remain expanded
-      $('.sf-menu li.active-trail', context)
-        .addClass('sfHover')
-        .children('ul')
-        .show();
-    }
-  };
+  $(document).ready(function () {
+    // When a main menu item (that has a submenu) is clicked
+    $('.sf-menu li.menuparent > a').on('click', function (e) {
+      var $parentLi = $(this).parent('li');
+
+      // If submenu is already open, let navigation happen (second click)
+      if ($parentLi.hasClass('sfHover')) {
+        return true; // proceed with normal link navigation
+      }
+
+      // Otherwise, open the submenu and prevent navigation
+      e.preventDefault();
+
+      // Close any other open submenus
+      $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
+
+      // Open the clicked submenu and keep it open
+      $parentLi.addClass('sfHover').children('ul').show();
+    });
+
+    // Close submenu when user clicks outside the menu
+    $(document).on('click', function (e) {
+      if (!$(e.target).closest('.sf-menu').length) {
+        $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
+      }
+    });
+
+    // Close submenu when user clicks a submenu link
+    $('.sf-menu li.menuparent ul li a').on('click', function () {
+      $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
+    });
+  });
 })(jQuery);
 
 CONTENTS OF THIS FILE
