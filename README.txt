@@ -1,6 +1,4 @@
-
-
-(function ($) {
+function ($) {
   $(document).ready(function () {
     // When a main menu item (that has a submenu) is clicked
     $('.sf-menu li.menuparent > a').on('click', function (e) {
@@ -28,12 +26,7 @@
       }
     });
 
-    // Close submenu when user clicks a submenu link
-    $('.sf-menu li.menuparent ul li a').on('click', function () {
-      $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
-    });
-  });
-})(jQuery);
+
 
 CONTENTS OF THIS FILE
 ---------------------
