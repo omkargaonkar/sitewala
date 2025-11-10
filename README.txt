@@ -1,27 +1,114 @@
 
-(function ($) {
-  $(document).ready(function () {
-    // When a main menu item with submenu is clicked
-    $('.sf-menu li.menuparent > a').on('click', function (e) {
-      var $parentLi = $(this).parent('li');
 
-      // If submenu is not already open, open it and prevent navigation
-      if (!$parentLi.hasClass('sfHover')) {
-        e.preventDefault(); // stop navigation on first click
 
-        // Close any other open submenus (optional, can remove if you want multiple open)
-        $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
+Excellent — that’s a key clue 👏
 
-        // Keep clicked submenu open
-        $parentLi.addClass('sfHover').children('ul').show();
-      }
-      // If already open and clicked again, allow navigation
-      else {
-        return true;
-      }
-    });
-  });
-})(jQuery);
+If removing position: relative; from the menu container (or li) fixes the sticky submenu issue, it means the submenu’s position: absolute; was being confined (clipped) to the boundary of its nearest positioned ancestor.
+
+Let’s go over why this happens, and then I’ll give you the correct CSS fix that keeps your submenu sticky without breaking layout alignment.
+
+⸻
+
+🧩 Why this happens
+
+In CSS:
+	•	A child element with position: absolute; is positioned relative to the nearest ancestor that has position: relative;, absolute;, or fixed;.
+	•	The Superfish submenu (ul) is absolutely positioned.
+	•	If a parent <li> or .sf-menu has position: relative;, the submenu’s “absolute” positioning stays inside that container — sometimes getting clipped or hidden.
+
+When you removed position: relative;, the submenu was positioned relative to the page, which made it visible again.
+
+So, we need to either:
+	1.	Keep relative positioning (for correct layout), but ensure submenus are visible outside it, or
+	2.	Adjust submenu positioning rules so it works even with relative parent.
+
+⸻
+
+✅ Recommended Fix #1 — Use overflow: visible
+
+If the submenu is being cut off or hidden because of parent bounds:
+
+.sf-menu li {
+  position: relative; /* keep it if needed for proper alignment */
+  overflow: visible !important; /* allow submenu to display outside the li */
+  z-index: auto;
+}
+
+This keeps relative positioning (for hover alignment) but allows dropdowns to show beyond their container.
+
+⸻
+
+✅ Recommended Fix #2 — Adjust submenu positioning context
+
+If the .sf-menu or a higher container (like nav) has position: relative; causing clipping, instead of removing it globally, limit it to direct children:
+
+.sf-menu {
+  position: static !important; /* avoid confining dropdowns */
+}
+.sf-menu > li {
+  position: relative; /* keep relative for li-level alignment */
+}
+
+This way, each top-level li anchors its own submenu, not the whole menu wrapper.
+
+⸻
+
+✅ Recommended Fix #3 — Use position: absolute + z-index
+
+Sometimes submenus appear behind other content after you change positioning. Fix with:
+
+.sf-menu li ul {
+  position: absolute;
+  z-index: 9999; /* ensures submenu stays above other content */
+}
+
+
+⸻
+
+✅ Recommended Fix #4 — Combination (most stable setup)
+
+Here’s a solid Superfish CSS combination you can safely apply:
+
+/* Keep main list structure stable */
+.sf-menu,
+.sf-menu * {
+  position: static;
+  overflow: visible !important;
+}
+
+/* Each li anchors its submenu */
+.sf-menu li {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Submenu styling */
+.sf-menu li ul {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: none;
+  z-index: 9999;
+}
+
+/* Ensure active-trail submenus stay visible */
+.sf-menu li.active-trail > ul {
+  display: block !important;
+  visibility: visible !important;
+}
+
+
+⸻
+
+⚙️ How to apply
+	1.	Add the above CSS to your theme’s stylesheet (style.css or custom.css).
+	2.	Clear cache and reload page.
+	3.	Confirm submenus stay open when active, and alignment looks correct.
+
+⸻
+
+Would you like to share your current menu HTML structure (just one <ul> level)?
+If you do, I’ll tailor the exact positioning CSS for your markup (sometimes .sf-menu is nested in .region-primary-menu or similar, which changes behavior).
 
 
 CONTENTS OF THIS FILE
