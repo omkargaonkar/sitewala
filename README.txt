@@ -1,12 +1,45 @@
-.social-links {
+/* ---- Fix: Make social media links responsive at 200% zoom ---- */
+.social-media-links,
+.social-media-links--platforms {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem; /* add spacing between icons */
+  max-width: 100%;
+  overflow: visible !important;
 }
 
-.social-links a {
+/* ---- Fix: Icons should scale with text ---- */
+.social-media-links__icon {
+  width: 1.5em;   /* relative to text size, scales with zoom */
+  height: 1.5em;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ---- Ensure icons do not clip or overlap ---- */
+.social-media-links__platform,
+.social-media-links__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
-  max-width: 100%;
+}
+
+/* ---- Prevent hidden overflow ---- */
+.block-social-media-links,
+.region-footer,
+.region-social {
+  overflow: visible !important;
+}
+
+/* ---- Optional: stack icons when space is limited ---- */
+@media (max-width: 1280px) {
+  .social-media-links--platforms {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
 
