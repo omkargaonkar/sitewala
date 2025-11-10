@@ -1,17 +1,15 @@
-(function ($) {
-  $(document).ready(function () {
-    $('.sf-menu').superfish({
-      delay: 1000,
-      animation: {opacity:'show', height:'show'},
-      speed: 'fast',
-      cssArrows: true,
-      disableHI: false,
-      onHandleTouch: function() { return true; }, // allows touch/click
-      onClick: function() { $(this).toggleClass('sfHover'); }
-    });
-  });
-})(jQuery);
 
+(function ($) {
+  Drupal.behaviors.superfishActiveTrail = {
+    attach: function (context, settings) {
+      // Ensure active trail parent menus remain expanded
+      $('.sf-menu li.active-trail', context)
+        .addClass('sfHover')
+        .children('ul')
+        .show();
+    }
+  };
+})(jQuery);
 
 CONTENTS OF THIS FILE
 ---------------------
