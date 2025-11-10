@@ -1,26 +1,16 @@
 (function ($) {
   $(document).ready(function () {
-    // When a main menu item with sub-menu is clicked
-    $('.sf-menu li.menuparent > a').on('click', function (e) {
-      e.preventDefault(); // prevent default navigation
-      var $parentLi = $(this).parent('li');
-
-      // Close other open submenus
-      $('.sf-menu li.menuparent').not($parentLi).removeClass('sfHover');
-
-      // Toggle the clicked one
-      $parentLi.toggleClass('sfHover');
-    });
-
-    // Click outside menu closes submenu
-    $(document).on('click', function (e) {
-      if (!$(e.target).closest('.sf-menu').length) {
-        $('.sf-menu li.menuparent').removeClass('sfHover');
-      }
+    $('.sf-menu').superfish({
+      delay: 1000,
+      animation: {opacity:'show', height:'show'},
+      speed: 'fast',
+      cssArrows: true,
+      disableHI: false,
+      onHandleTouch: function() { return true; }, // allows touch/click
+      onClick: function() { $(this).toggleClass('sfHover'); }
     });
   });
 })(jQuery);
-
 
 
 CONTENTS OF THIS FILE
