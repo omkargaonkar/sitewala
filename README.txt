@@ -1,32 +1,57 @@
-/* --- Fix AddToAny buttons layout and accessibility --- */
+/* --- Fix AddToAny share buttons for 200% zoom accessibility --- */
+
+/* Allow wrapping and prevent clipping */
 .a2a_kit,
 .a2a_floating_style,
 .a2a_default_style {
   display: flex !important;
   flex-wrap: wrap !important;
-  gap: 0.5rem;
-  max-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;              /* space between icons */
+  max-width: 100% !important;
   overflow: visible !important;
+  white-space: normal !important;
 }
 
+/* Make each share button scale with zoom */
 .a2a_button_facebook,
 .a2a_button_twitter,
 .a2a_button_linkedin,
 .a2a_button_email,
-.a2a_button_whatsapp {
+.a2a_button_whatsapp,
+.a2a_button_x {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  width: 1.5em !important;
+  width: 1.5em !important;   /* relative sizing for zoom */
   height: 1.5em !important;
+  flex: 0 0 auto;
 }
 
+/* Ensure icon SVGs resize smoothly */
+.a2a_svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* At narrow or zoomed widths, stack neatly */
 @media (max-width: 1280px) {
   .a2a_kit {
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
   }
 }
+
+/* Prevent outer containers from clipping content */
+.block-addtoany,
+.region-footer,
+.region-content {
+  overflow: visible !important;
+}
+
+
 
 CONTENTS OF THIS FILE
 ---------------------
