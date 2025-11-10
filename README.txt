@@ -1,31 +1,27 @@
-function ($) {
+
+(function ($) {
   $(document).ready(function () {
-    // When a main menu item (that has a submenu) is clicked
+    // When a main menu item with submenu is clicked
     $('.sf-menu li.menuparent > a').on('click', function (e) {
       var $parentLi = $(this).parent('li');
 
-      // If submenu is already open, let navigation happen (second click)
-      if ($parentLi.hasClass('sfHover')) {
-        return true; // proceed with normal link navigation
-      }
+      // If submenu is not already open, open it and prevent navigation
+      if (!$parentLi.hasClass('sfHover')) {
+        e.preventDefault(); // stop navigation on first click
 
-      // Otherwise, open the submenu and prevent navigation
-      e.preventDefault();
-
-      // Close any other open submenus
-      $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
-
-      // Open the clicked submenu and keep it open
-      $parentLi.addClass('sfHover').children('ul').show();
-    });
-
-    // Close submenu when user clicks outside the menu
-    $(document).on('click', function (e) {
-      if (!$(e.target).closest('.sf-menu').length) {
+        // Close any other open submenus (optional, can remove if you want multiple open)
         $('.sf-menu li.menuparent').removeClass('sfHover').children('ul').hide();
+
+        // Keep clicked submenu open
+        $parentLi.addClass('sfHover').children('ul').show();
+      }
+      // If already open and clicked again, allow navigation
+      else {
+        return true;
       }
     });
-
+  });
+})(jQuery);
 
 
 CONTENTS OF THIS FILE
