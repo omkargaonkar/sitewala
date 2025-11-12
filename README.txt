@@ -1,133 +1,86 @@
 
-Got it 👍 — you’re referring to Accessibility Issue: early-AMP104 about the AddToAny (Share) modal in Drupal, where keyboard focus isn’t trapped inside the modal once it opens.
-
-Let’s go step-by-step on how to fix this for the AddToAny module.
-
-⸻
-
-🧩 Issue Summary
-
-When the user opens the AddToAny “Share” modal (dialog), focus:
-	•	Does not move inside the modal.
-	•	Is not trapped within it (you can tab out of the dialog).
-
-This violates WCAG 2.1.1 Keyboard and 2.4.3 Focus Order, plus ARIA 1.2 Dialog pattern requirements.
+      Yes 👍 — there is a simpler fix, without writing a full custom focus-trap script.
+You can make the AddToAny “Share” modal accessible with just a few small steps — simple, clean, and Drupal-friendly 👇
 
 ⸻
 
-✅ Goal
+🪄 Simple Fix (Quick Approach)
 
-When the modal opens:
-	1.	Move focus to the first focusable element (e.g., “Copy Link”).
-	2.	Trap focus within the modal (Shift+Tab / Tab shouldn’t escape).
-	3.	Return focus to the trigger (e.g., “Share” button) when modal closes.
+You just need to:
+	1.	Give focus to the modal when it opens, and
+	2.	Return focus to the “Share” button when it closes.
+
+This doesn’t create a full focus trap, but it solves the main accessibility problem (screen reader + keyboard users knowing a modal appeared).
 
 ⸻
 
-🛠️ Solution (Drupal AddToAny Integration)
+🧩 Steps
 
-Option 1: Custom JavaScript Fix (Recommended)
-Since AddToAny doesn’t yet support focus trapping natively, you can patch this behavior with a small JS snippet in your Drupal theme or custom module.
-
-Add this JS to your custom module or theme (for example, custom_focus_trap.js):
+1. Add a small JavaScript file (example: a2a_focus_fix.js)
+Put this file in your theme or custom module’s js/ folder:
 
 (function (Drupal) {
-  Drupal.behaviors.addToAnyFocusTrap = {
+  Drupal.behaviors.a2aFocusFix = {
     attach: function (context) {
       const modal = document.querySelector('#a2a_modal');
-      const shareButton = document.querySelector('[data-a2a-url], .a2a_dd'); // adjust selector if needed
+      const shareButton = document.querySelector('.a2a_dd'); // Adjust if different
 
       if (!modal || !shareButton) return;
 
-      // Trap focus inside modal
-      const trapFocus = (event) => {
-        const focusableElements = modal.querySelectorAll(
-          'a, button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
-        );
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (event.key === 'Tab') {
-          if (event.shiftKey) {
-            // Shift + Tab
-            if (document.activeElement === firstElement) {
-              event.preventDefault();
-              lastElement.focus();
-            }
-          } else {
-            // Tab
-            if (document.activeElement === lastElement) {
-              event.preventDefault();
-              firstElement.focus();
-            }
-          }
-        }
-      };
-
-      // Observe modal open
+      // Watch for the modal becoming visible
       const observer = new MutationObserver(() => {
         if (modal.style.display !== 'none') {
-          // Move focus to first element
-          const focusable = modal.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
-          if (focusable) focusable.focus();
-
-          modal.addEventListener('keydown', trapFocus);
+          // Modal is open — move focus inside
+          modal.setAttribute('aria-modal', 'true');
+          modal.setAttribute('role', 'dialog');
+          modal.focus();
         } else {
-          modal.removeEventListener('keydown', trapFocus);
-          // Return focus to Share button
+          // Modal closed — return focus to Share button
           shareButton.focus();
         }
       });
 
-      observer.observe(modal, { attributes: true, attributeFilter: ['style', 'class'] });
+      observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
     },
   };
 })(Drupal);
 
-Then add it in your theme or module’s .libraries.yml and attach it.
 
-Example (in your theme):
+⸻
 
-custom_focus_trap:
+2. Add it to your theme’s .libraries.yml
+Example:
+
+a2a_focus_fix:
   js:
-    js/custom_focus_trap.js: {}
+    js/a2a_focus_fix.js: {}
   dependencies:
     - core/drupal
 
-Attach it in your theme’s .info.yml:
+Then attach it in your theme’s .info.yml:
 
 libraries:
-  - yourtheme/custom_focus_trap
+  - yourtheme/a2a_focus_fix
 
 
 ⸻
 
-Option 2: Add Accessible Attributes (Optional Enhancement)
-You can improve accessibility by ensuring these attributes are present:
+3. (Optional but Helpful) Add tabindex to make modal focusable
+In your AddToAny modal markup, ensure:
 
-<div id="a2a_modal" role="dialog" aria-modal="true" aria-labelledby="shareDialogTitle">
-  <h2 id="shareDialogTitle" class="visually-hidden">Share this content</h2>
-</div>
+<div id="a2a_modal" tabindex="-1"></div>
 
-aria-modal="true" helps screen readers recognize the modal context.
+This lets .focus() actually work when the modal opens.
 
 ⸻
 
-🧠 Why This Works
-	•	Focus automatically moves to the modal → users immediately know something changed.
-	•	Tabbing stays inside → prevents accidental focus escape.
-	•	Focus returns to “Share” → consistent keyboard behavior.
-	•	Works without altering AddToAny’s source code.
+✅ Result
+	•	Focus automatically moves inside the “Share” dialog when it opens.
+	•	Focus returns to the Share button when closed.
+	•	Screen readers will now announce the modal properly.
+	•	No complicated JS or HTML rework needed.
 
 ⸻
 
-🔗 References
-	•	W3C ARIA Dialog Best Practices:
-https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
-	•	AddToAny Drupal Module:
-https://www.drupal.org/project/addtoany
-
-⸻
-
-If you tell me which Drupal version you’re using (e.g. 9 or 10), I can tailor the JS snippet to match that (for example, once() usage or attaching via Drupal.behaviors correctly).
-Would you like me to give you a version-specific snippet (for Drupal 9 or 10)?
+Would you like me to show the exact CSS selector and code snippet based on your site’s AddToAny markup (you can paste a small HTML sample of your modal if you have it)?
+That way, I’ll give you the 100% working version.
