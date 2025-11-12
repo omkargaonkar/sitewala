@@ -1,122 +1,49 @@
-Excellent — that’s a very valid question, and you’re right 👍
-
-Because AddToAny is a contributed Drupal module, you shouldn’t modify its core code directly — doing so would break future updates.
-However, there are clean, Drupal-safe ways to remove or override the unnecessary title="Share Buttons" attribute without touching the module’s source files.
-
-Let’s go through the best possible solutions 👇
-
-⸻
-
-🧩 Issue Summary
-
-The AddToAny module outputs:
-
-<a href="https://www.addtoany.com" title="Share Buttons" target="_blank">AddToAny</a>
-
-That title attribute is redundant (since visible text “AddToAny” already serves as the link label).
-It triggers early-AMP112 — Ensure ARIA roles, states, and properties are valid.
-
-⸻
-
-✅ Solution Options (No Core Edit Required)
-
-Option 1 – Use a Small JavaScript Fix (Easiest Way)
-
-Add a lightweight behavior in your theme or custom module to remove that title automatically after rendering.
-
-File: js/remove_addtoany_title.js
-
 (function (Drupal) {
-  Drupal.behaviors.removeAddToAnyTitle = {
+  Drupal.behaviors.addToAnyCustomFixes = {
     attach: function (context) {
-      const links = context.querySelectorAll('a[title="Share Buttons"]');
-      links.forEach(link => link.removeAttribute('title'));
+      // 1️⃣ Remove unnecessary title attribute
+      context.querySelectorAll('a[title="Share Buttons"]').forEach(link => {
+        link.removeAttribute('title');
+      });
+
+      // 2️⃣ Ensure modal focus management (optional if already handled)
+      const modal = context.querySelector('#a2a_modal');
+      const shareButton = context.querySelector('.a2a_dd, [data-a2a-url]');
+      if (modal && shareButton) {
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('tabindex', '-1');
+
+        const trapFocus = (event) => {
+          const focusableElements = modal.querySelectorAll(
+            'a, button, input, [tabindex]:not([tabindex="-1"])'
+          );
+          const first = focusableElements[0];
+          const last = focusableElements[focusableElements.length - 1];
+          if (event.key === 'Tab') {
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }
+        };
+
+        const observer = new MutationObserver(() => {
+          const isVisible = modal.style.display !== 'none' && !modal.classList.contains('a2a_hide');
+          if (isVisible) {
+            const firstFocusable = modal.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+            (firstFocusable || modal).focus();
+            document.addEventListener('keydown', trapFocus);
+          } else {
+            document.removeEventListener('keydown', trapFocus);
+            shareButton.focus();
+          }
+        });
+        observer.observe(modal, { attributes: true, attributeFilter: ['style', 'class'] });
+      }
     }
   };
 })(Drupal);
-
-Then add this to your theme’s .libraries.yml:
-
-remove_addtoany_title:
-  js:
-    js/remove_addtoany_title.js: {}
-  dependencies:
-    - core/drupal
-
-And in your .info.yml:
-
-libraries:
-  - yourtheme/remove_addtoany_title
-
-✅ Pros
-	•	No core/module modification
-	•	Automatically runs when page renders
-	•	Passes accessibility validation
-	•	Easy to maintain
-
-⸻
-
-Option 2 – Override the AddToAny Twig Template (If Available)
-
-Check if AddToAny outputs through a Twig template (like addtoany.html.twig).
-If it does, you can copy that file into your theme’s templates/ folder and remove the title attribute.
-
-For example:
-
-/themes/custom/yourtheme/templates/modules/addtoany/addtoany.html.twig
-
-Modify:
-
-<a href="{{ url }}" title="Share Buttons">
-
-to
-
-<a href="{{ url }}">
-
-✅ Pros
-	•	Pure Drupal way
-	•	No JavaScript needed
-	•	Permanent and update-safe
-
-⚠️ Cons
-	•	Only possible if the module provides Twig templates (some versions don’t).
-
-⸻
-
-Option 3 – Use a hook_preprocess() Override (Developer-Friendly)
-
-If you prefer a PHP-based solution, use a preprocess hook to alter the output before rendering.
-
-In your custom module (e.g., mymodule.module):
-
-function mymodule_preprocess_addtoany(&$variables) {
-  if (isset($variables['link']['#attributes']['title']) && $variables['link']['#attributes']['title'] === 'Share Buttons') {
-    unset($variables['link']['#attributes']['title']);
-  }
-}
-
-✅ Pros
-	•	Works server-side (no JS)
-	•	Still safe for updates
-	•	Clean Drupal practice
-
-⸻
-
-🏁 Best Practice Recommendation
-
-If you’re not customizing module output heavily:
-👉 Use Option 1 (JS method) — simplest, no PHP changes, and fulfills early-AMP112 accessibility expectations.
-
-⸻
-
-💬 JIRA Comment Example
-
-You can add this to your ticket comment:
-
-Since the title="Share Buttons" attribute is generated by the contributed AddToAny module, we will not modify the module directly.
-To resolve this accessibility issue (early-AMP112), we added a lightweight front-end fix to remove the unnecessary title attribute dynamically after rendering.
-This ensures compliance with WCAG 4.1.2 while keeping the contributed module intact and updatable.
-
-⸻
-
-Would you like me to give you the final Drupal 10–compatible snippet (using once() utility) for the JS solution so it doesn’t run multiple times per attach?
