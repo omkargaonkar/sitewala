@@ -1,193 +1,133 @@
-/* --- Fix AddToAny share buttons for 200% zoom accessibility --- */
 
-/* Allow wrapping and prevent clipping */
-.a2a_kit,
-.a2a_floating_style,
-.a2a_default_style {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;              /* space between icons */
-  max-width: 100% !important;
-  overflow: visible !important;
-  white-space: normal !important;
-}
+Got it 👍 — you’re referring to Accessibility Issue: early-AMP104 about the AddToAny (Share) modal in Drupal, where keyboard focus isn’t trapped inside the modal once it opens.
 
-/* Make each share button scale with zoom */
-.a2a_button_facebook,
-.a2a_button_twitter,
-.a2a_button_linkedin,
-.a2a_button_email,
-.a2a_button_whatsapp,
-.a2a_button_x {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 1.5em !important;   /* relative sizing for zoom */
-  height: 1.5em !important;
-  flex: 0 0 auto;
-}
+Let’s go step-by-step on how to fix this for the AddToAny module.
 
-/* Ensure icon SVGs resize smoothly */
-.a2a_svg {
-  width: 100% !important;
-  height: 100% !important;
-}
+⸻
 
-/* At narrow or zoomed widths, stack neatly */
-@media (max-width: 1280px) {
-  .a2a_kit {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
+🧩 Issue Summary
 
-/* Prevent outer containers from clipping content */
-.block-addtoany,
-.region-footer,
-.region-content {
-  overflow: visible !important;
-}
+When the user opens the AddToAny “Share” modal (dialog), focus:
+	•	Does not move inside the modal.
+	•	Is not trapped within it (you can tab out of the dialog).
 
+This violates WCAG 2.1.1 Keyboard and 2.4.3 Focus Order, plus ARIA 1.2 Dialog pattern requirements.
 
+⸻
 
-CONTENTS OF THIS FILE
----------------------
+✅ Goal
 
- * About Drupal
- * Configuration and features
- * Installation profiles
- * Appearance
- * Developing for Drupal
- * More information
+When the modal opens:
+	1.	Move focus to the first focusable element (e.g., “Copy Link”).
+	2.	Trap focus within the modal (Shift+Tab / Tab shouldn’t escape).
+	3.	Return focus to the trigger (e.g., “Share” button) when modal closes.
 
-ABOUT DRUPAL
-------------
+⸻
 
-Drupal is an open source content management platform supporting a variety of
-websites ranging from personal weblogs to large community-driven websites. For
-more information, see the Drupal website at https://www.drupal.org, and join
-the Drupal community at https://www.drupal.org/community.
+🛠️ Solution (Drupal AddToAny Integration)
 
-Legal information about Drupal:
- * Know your rights when using Drupal:
-   See LICENSE.txt in the "core" directory.
- * Learn about the Drupal trademark and logo policy:
-   https://www.drupal.com/trademark
+Option 1: Custom JavaScript Fix (Recommended)
+Since AddToAny doesn’t yet support focus trapping natively, you can patch this behavior with a small JS snippet in your Drupal theme or custom module.
 
-CONFIGURATION AND FEATURES
---------------------------
+Add this JS to your custom module or theme (for example, custom_focus_trap.js):
 
-Drupal core (what you get when you download and extract a drupal-x.y.tar.gz or
-drupal-x.y.zip file from https://www.drupal.org/project/drupal) has what you
-need to get started with your website. It includes several modules (extensions
-that add functionality) for common website features, such as managing content,
-user accounts, image uploading, and search. Core comes with many options that
-allow site-specific configuration. In addition to the core modules, there are
-thousands of contributed modules (for functionality not included with Drupal
-core) available for download.
+(function (Drupal) {
+  Drupal.behaviors.addToAnyFocusTrap = {
+    attach: function (context) {
+      const modal = document.querySelector('#a2a_modal');
+      const shareButton = document.querySelector('[data-a2a-url], .a2a_dd'); // adjust selector if needed
 
-More about configuration:
- * Install, update, and maintain Drupal:
-   See INSTALL.txt and UPDATE.txt in the "core" directory.
- * Learn about how to use Drupal to create your site:
-   https://www.drupal.org/documentation
- * Follow best practices:
-   https://www.drupal.org/best-practices
- * Download contributed modules to /modules to extend Drupal's functionality:
-   https://www.drupal.org/project/modules
- * See also: "Developing for Drupal" for writing your own modules, below.
+      if (!modal || !shareButton) return;
 
+      // Trap focus inside modal
+      const trapFocus = (event) => {
+        const focusableElements = modal.querySelectorAll(
+          'a, button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
 
-INSTALLATION PROFILES
----------------------
+        if (event.key === 'Tab') {
+          if (event.shiftKey) {
+            // Shift + Tab
+            if (document.activeElement === firstElement) {
+              event.preventDefault();
+              lastElement.focus();
+            }
+          } else {
+            // Tab
+            if (document.activeElement === lastElement) {
+              event.preventDefault();
+              firstElement.focus();
+            }
+          }
+        }
+      };
 
-Installation profiles define additional steps (such as enabling modules,
-defining content types, etc.) that run after the base installation provided
-by core when Drupal is first installed. There are two basic installation
-profiles provided with Drupal core.
+      // Observe modal open
+      const observer = new MutationObserver(() => {
+        if (modal.style.display !== 'none') {
+          // Move focus to first element
+          const focusable = modal.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+          if (focusable) focusable.focus();
 
-Installation profiles from the Drupal community modify the installation process
-to provide a website for a specific use case, such as a CMS for media
-publishers, a web-based project tracking tool, or a full-fledged CRM for
-non-profit organizations raising money and accepting donations. They can be
-distributed as bare installation profiles or as "distributions". Distributions
-include Drupal core, the installation profile, and all other required
-extensions, such as contributed and custom modules, themes, and third-party
-libraries. Bare installation profiles require you to download Drupal Core and
-the required extensions separately; place the downloaded profile in the
-/profiles directory before you start the installation process.
+          modal.addEventListener('keydown', trapFocus);
+        } else {
+          modal.removeEventListener('keydown', trapFocus);
+          // Return focus to Share button
+          shareButton.focus();
+        }
+      });
 
-More about installation profiles and distributions:
- * Read about the difference between installation profiles and distributions:
-   https://www.drupal.org/node/1089736
- * Download contributed installation profiles and distributions:
-   https://www.drupal.org/project/distributions
- * Develop your own installation profile or distribution:
-   https://www.drupal.org/developing/distributions
+      observer.observe(modal, { attributes: true, attributeFilter: ['style', 'class'] });
+    },
+  };
+})(Drupal);
+
+Then add it in your theme or module’s .libraries.yml and attach it.
+
+Example (in your theme):
+
+custom_focus_trap:
+  js:
+    js/custom_focus_trap.js: {}
+  dependencies:
+    - core/drupal
+
+Attach it in your theme’s .info.yml:
+
+libraries:
+  - yourtheme/custom_focus_trap
 
 
-APPEARANCE
-----------
+⸻
 
-In Drupal, the appearance of your site is set by the theme (themes are
-extensions that set fonts, colors, and layout). Drupal core comes with several
-themes. More themes are available for download, and you can also create your own
-custom theme.
+Option 2: Add Accessible Attributes (Optional Enhancement)
+You can improve accessibility by ensuring these attributes are present:
 
-More about themes:
- * Download contributed themes to /themes to modify Drupal's appearance:
-   https://www.drupal.org/project/themes
- * Develop your own theme:
-   https://www.drupal.org/documentation/theme
+<div id="a2a_modal" role="dialog" aria-modal="true" aria-labelledby="shareDialogTitle">
+  <h2 id="shareDialogTitle" class="visually-hidden">Share this content</h2>
+</div>
 
-DEVELOPING FOR DRUPAL
----------------------
+aria-modal="true" helps screen readers recognize the modal context.
 
-Drupal contains an extensive API that allows you to add to and modify the
-functionality of your site. The API consists of "hooks", which allow modules to
-react to system events and customize Drupal's behavior, and functions that
-standardize common operations such as database queries and form generation. The
-flexible hook architecture means that you should never need to directly modify
-the files that come with Drupal core to achieve the functionality you want;
-instead, functionality modifications take the form of modules.
+⸻
 
-When you need new functionality for your Drupal site, search for existing
-contributed modules. If you find a module that matches except for a bug or an
-additional needed feature, change the module and contribute your improvements
-back to the project in the form of a "patch". Create new custom modules only
-when nothing existing comes close to what you need.
+🧠 Why This Works
+	•	Focus automatically moves to the modal → users immediately know something changed.
+	•	Tabbing stays inside → prevents accidental focus escape.
+	•	Focus returns to “Share” → consistent keyboard behavior.
+	•	Works without altering AddToAny’s source code.
 
-More about developing:
- * Search for existing contributed modules:
-   https://www.drupal.org/project/modules
- * Contribute a patch:
-   https://www.drupal.org/patch/submit
- * Develop your own module:
-   https://www.drupal.org/developing/modules
- * Follow programming best practices:
-   https://www.drupal.org/developing/best-practices
- * Refer to the API documentation:
-   https://api.drupal.org/api/drupal/8
- * Learn from documented Drupal API examples:
-   https://www.drupal.org/project/examples
+⸻
 
-MORE INFORMATION
-----------------
+🔗 References
+	•	W3C ARIA Dialog Best Practices:
+https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
+	•	AddToAny Drupal Module:
+https://www.drupal.org/project/addtoany
 
- * See the Drupal.org online documentation:
-   https://www.drupal.org/documentation
+⸻
 
- * For a list of security announcements, see the "Security advisories" page at
-   https://www.drupal.org/security (available as an RSS feed). This page also
-   describes how to subscribe to these announcements via email.
-
- * For information about the Drupal security process, or to find out how to
-   report a potential security issue to the Drupal security team, see the
-   "Security team" page at https://www.drupal.org/security-team
-
- * For information about the wide range of available support options, visit
-   https://www.drupal.org and click on Community and Support in the top or
-   bottom navigation.
+If you tell me which Drupal version you’re using (e.g. 9 or 10), I can tailor the JS snippet to match that (for example, once() usage or attaching via Drupal.behaviors correctly).
+Would you like me to give you a version-specific snippet (for Drupal 9 or 10)?
