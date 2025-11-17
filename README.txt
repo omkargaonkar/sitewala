@@ -1,51 +1,38 @@
 /**
- * Validation for Supplier Registration contact form.
- */
-function YOURMODULE_form_contact_message_contact_name_form_validate(&$form, &$form_state) {
-  // Get value of field_ar (0/1 checkboxes).
-  $value = $form_state->getValue('field_ar');
-
-  // field_ar returns an array like: [0 => '0'] or []
-  // If empty => no selection.
-  if (empty(array_filter($value))) {
-    $form_state->setErrorByName(
-      'field_ar',
-      t('Please select a valid option for “Are you a registered Diversity Supplier?”.')
-    );
-  }
-}
-
-/**
  * Implements hook_form_alter().
  */
 function content_type_template_fields_form_alter(&$form, FormStateInterface $form_state, $form_id) {
 
-  // ---------- EXISTING CODE ----------
-  // your old code for node_type_edit_form remains same
+  // --- Your existing module logic remains unchanged ---
   if ($form_id == 'node_type_edit_form') {
-    // existing logic...
+    // your previous logic...
   }
 
-  // ---------- NEW CODE FOR SUPPLIER REGISTRATION CONTACT FORM ----------
-  if ($form_id == 'contact_message_supplier_registration_form') {
+  // --- New code for Supplier Registration contact form ---
+  if ($form_id == 'contact_message_contact_name_form') {
 
-    // Check if field exists in form
-    if (isset($form['field_ar'])) {
+    // Ensure field exists
+    if (isset($form['field_ar']['widget'])) {
 
-      // Get checkbox options
-      $options = $form['field_ar']['widget']['#options'];
-
-      // Convert "No" (0) into radio button
+      // Force radios instead of checkboxes
       $form['field_ar']['widget']['#type'] = 'radios';
 
-      // Optional: ensure required attribute applies correctly
+      // Force options for radios
+      $form['field_ar']['widget']['#options'] = [
+        0 => t('No'),
+        1 => t('Yes'),
+      ];
+
+      // Set default if needed (optional)
+      if (empty($form['field_ar']['widget']['#default_value'])) {
+        $form['field_ar']['widget']['#default_value'] = 0; // No by default
+      }
+
+      // Make sure only one required selection
       $form['field_ar']['widget']['#required'] = TRUE;
 
-      // Optional: set title if needed
+      // Set title again (not required but safe)
       $form['field_ar']['widget']['#title'] = t('Are you a registered Diversity Supplier?');
-
-      // Optional: Add attributes
-      $form['field_ar']['widget']['#attributes']['class'][] = 'my-custom-radio';
     }
   }
 }
