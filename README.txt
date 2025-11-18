@@ -1,56 +1,106 @@
-// *****************************************
-// REQUIRED YES/NO CHECKBOX GROUP VALIDATION
-// *****************************************
+_validateField = function ($input) {
+  // $input: jQuery object of the field to validate
+  var value = $input.val(),
+      type = $input.attr('type'),
+      $fieldWrapper = $input.closest('.' + parentWrapperClass),
+      emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      phoneRegex = /^\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/,
+      valid = true;
 
-function validateCheckboxGroups() {
-    var errors = false;
+  // --- CLEAR previous error state for this input ---
+  // hide textual error in wrapper (if present)
+  $fieldWrapper.removeClass('has-error');
+  $fieldWrapper.find('.error-msg').hide();
+  $input.removeAttr('aria-invalid');
 
-    // Find all required checkbox groups
-    var $requiredCheckboxes = $contactForm.find('input[type="checkbox"][required]');
+  // -------------------------------
+  // NEW: Checkbox-group handling
+  // If the element is a checkbox, validate the whole group by name.
+  // -------------------------------
+  if ($input.is(':checkbox')) {
+    // Group name (checkboxes for one field share the same name, e.g. field_ar[0])
+    var groupName = $input.attr('name');
+    var $group = $input.closest('form').find('input[name="' + groupName + '"]');
 
-    if ($requiredCheckboxes.length === 0) {
-        return false;
+    // Find fieldset wrapper (Drupal renders boolean fields inside a fieldset).
+    var $fieldset = $group.first().closest('fieldset');
+    if ($fieldset.length === 0) {
+      // Fallback to nearest form-item wrapper
+      $fieldset = $group.first().closest('.form-item');
     }
 
-    // Group checkboxes by name
-    var groups = {};
-    $requiredCheckboxes.each(function () {
-        var name = $(this).attr('name');
+    // Remove previous group error
+    $fieldset.removeClass('has-error');
+    $fieldset.find('.checkbox-error').remove();
 
-        if (!groups[name]) {
-            groups[name] = $contactForm.find('input[name="' + name + '"]');
-        }
-    });
+    // If none of the checkboxes in this group are checked => invalid
+    if (!$group.is(':checked')) {
+      valid = false;
 
-    // Validate groups
-    $.each(groups, function (name, $group) {
+      // set aria-invalid on all checkboxes in the group so SR knows
+      $group.attr('aria-invalid', 'true');
 
-        var $first = $group.first();
+      // Add an accessible error message inside the fieldset (role=alert so SR announces)
+      var labelText = $fieldset.find('.fieldset-legend').first().text().trim() || 'This field';
+      var $err = $(
+        '<div class="checkbox-error error-msg" role="alert" style="color:red;margin-top:6px;">' +
+          'Please select a valid option for "' + labelText + '".' +
+        '</div>'
+      );
+      $fieldset.addClass('has-error').find('.fieldset-wrapper').append($err);
 
-        // ✔ IMPORTANT — Target FIELDSET (from your screenshot)
-        var $fieldset = $first.closest('fieldset');
+    } else {
+      // valid: ensure aria-invalid is removed from group
+      $group.removeAttr('aria-invalid');
+      $fieldset.removeClass('has-error');
+      $fieldset.find('.checkbox-error').remove();
+    }
 
-        if ($fieldset.length === 0) {
-            // fallback
-            $fieldset = $first.closest('.form-item');
-        }
+    // Return result for group validation (we've handled checkbox group here)
+    return valid;
+  }
+  // -------------------------------
+  // END: Checkbox-group handling
+  // -------------------------------
 
-        // Remove old errors
-        $fieldset.removeClass('has-error');
-        $fieldset.find('.checkbox-error').remove();
+  // Required validation for non-checkbox fields
+  if ($input.prop('required')) {
+    if (value === null || typeof value === 'undefined' || (String(value).trim && String(value).trim() === '')) {
+      $fieldWrapper.addClass('has-error');
+      $fieldWrapper.find('.error-msg').text('This field is required.').show();
+      $input.attr('aria-invalid', 'true');
+      return false;
+    }
+  }
 
-        // If nothing selected → show the error
-        if (!$group.is(':checked')) {
+  // Email validation
+  if (type === 'email' && value && value.length) {
+    if (!emailRegex.test(value)) {
+      $fieldWrapper.addClass('has-error');
+      $fieldWrapper.find('.error-msg').text('Please enter a valid email address.').show();
+      $input.attr('aria-invalid', 'true');
+      return false;
+    }
+  }
 
-            errors = true;
+  // Phone validation (simple 10-digit check; adjust regex if needed)
+  if (type === 'tel' && value && value.length) {
+    var digits = value.replace(/\D/g, '');
+    if (!phoneRegex.test(digits)) {
+      $fieldWrapper.addClass('has-error');
+      $fieldWrapper.find('.error-msg').text('Please enter a valid phone number.').show();
+      $input.attr('aria-invalid', 'true');
+      return false;
+    } else {
+      // optionally rewrite formatted value (uncomment if you want)
+      // $input.val('(' + digits.substr(0,3) + ') ' + digits.substr(3,3) + '-' + digits.substr(6,4));
+    }
+  }
 
-            $fieldset.addClass('has-error');
+  // If we reach here, field is valid
+  $fieldWrapper.removeClass('has-error');
+  $fieldWrapper.find('.error-msg').hide();
+  $input.removeAttr('aria-invalid');
 
-            // Append clean error message below the checkboxes
-            $fieldset.find('.fieldset-wrapper')
-                .append('<div class="checkbox-error error-msg" style="color:red;margin-top:6px;">Please select a valid option from Are you a registered Diversity Supplier.</div>');
-        }
-    });
-
-    return errors;
-}
+  return true;
+};
