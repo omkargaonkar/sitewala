@@ -1,107 +1,183 @@
-Thanks — I now have your full file.
-Your code is messy because of formatting issues, missing quotes, broken brackets, and typos — but I will NOT rewrite everything (since you said you cannot paste full files).
+jQuery(document).ready(function () {
 
-You asked for two things only:
+  'use strict';
 
-⸻
+  var $ = jQuery,
 
-✅ 1. Add Yes/No checkbox validation
+    $contactForm = $('.contact-form form, form.contact-form'),
+    $inputs,
+    $captchaContainer,
+    inputSelector = 'input[type=text], input[type=email], input[type=tel], textarea, select',
+    parentWrapperClass = 'form-item',
+    validateField;
 
-✅ 2. Add changes inside _validateField()
+  if ($contactForm.length) {
 
-So here is EXACTLY what you must add — READY TO COPY-PASTE — without touching your other code.
+    $contactForm.attr('novalidate', 'novalidate');
+    $inputs = $contactForm.find(inputSelector);
+    $captchaContainer = $contactForm.find('div.captcha');
 
-⸻
+    // ADD ERROR SPANS
+    $inputs.each(function (index, item) {
+      var $input = $(item),
+        $fieldWrapper,
+        errorMsg,
+        currentFieldErrMsg;
 
-✅ STEP 1 — ADD THIS BLOCK INSIDE $contactForm.on('submit', function(e) { BEFORE reCaptcha validation
+      // REQUIRED ERROR MESSAGE
+      if ($("label[for='" + $input.attr("id") + "']").length) {
+        currentFieldErrMsg =
+          $("label[for='" + $input.attr("id") + "']").text() +
+          " field is required.";
+      } else {
+        currentFieldErrMsg = "Please complete this mandatory field.";
+      }
 
-👉 Paste this just before:
+      if ($input.attr('required') === 'required') {
+        $fieldWrapper = $input.closest("." + parentWrapperClass);
+        errorMsg = $input.attr('type') === 'email'
+          ? 'Please enter a valid email address.'
+          : currentFieldErrMsg;
 
-if ($captchaContainer.length) {
-
-
-⸻
-
-⭐ YES / NO CHECKBOX VALIDATION BLOCK
-
-// =========================================
-// YES / NO CHECKBOX VALIDATION (NEW CODE)
-// =========================================
-
-// Target your Yes/No field
-var yesNoCheckboxes = $('input[name="field_ar[0]"]');
-
-// Remove old errors first
-yesNoCheckboxes.removeAttr('aria-invalid');
-yesNoCheckboxes.closest('.js-form-item').removeClass('has-error');
-$('#field-ar-error').remove();
-
-// Check if none is selected
-if (!yesNoCheckboxes.is(':checked')) {
-
-    yesNoCheckboxes
-        .attr('aria-invalid', 'true')
-        .closest('.js-form-item')
-        .addClass('has-error')
-        .append(
-            '<span class="error-msg" id="field-ar-error" role="alert">' +
-            '<span class="error-icon"></span>' +
-            'Please select a valid option for "Are you a registered Diversity Supplier?".' +
-            '</span>'
+        $fieldWrapper.append(
+          '<span class="error-msg">' + errorMsg + '</span>'
         );
+      }
+    });
 
-    errors = true;   // stop form
-}
+    // Replace default select option
+    $contactForm.find('select option[value="_none"]')
+      .text('-- Select --')
+      .val('');
 
-✔ This ensures:
-	•	If neither Yes nor No is selected → ❌ show error + stop submit
-	•	If Yes or No is selected → ✅ form continues
-
-⸻
-
-✅ STEP 2 — CHANGES INSIDE _validateField()
-
-You don’t need a big change.
-Just add this simple rule so checkbox fields don’t break validation.
-
-👉 Add this above the final return valid; inside _validateField()
-
-⸻
-
-⭐ NEW CODE FOR CHECKBOX SUPPORT
-
-// =========================================
-// CHECKBOX HANDLING (NEW CODE)
-// =========================================
-if ($input.attr('type') === 'checkbox') {
-    // Checkbox is valid ONLY if checked
-    if ($input.is(':checked')) {
-        $fieldWrapper.removeClass('has-error');
-        return true;
-    } else {
-        $fieldWrapper.addClass('has-error');
-        return false;
+    if ($captchaContainer.length) {
+      $captchaContainer.append(
+        '<span class="error-msg">Please complete reCaptcha challenge.</span>'
+      );
     }
-}
 
+    // Field validation events
+    $inputs.keyup(function (e) {
+      validateField($(e.target));
+    });
 
-⸻
+    $inputs.change(function (e) {
+      validateField($(e.target));
+    });
 
-🎯 RESULT AFTER ADDING BOTH BLOCKS
+    // -----------------------------
+    // FORM SUBMIT VALIDATION
+    // -----------------------------
+    $contactForm.on('submit', function (e) {
 
-✔ “Yes / No” field is required
-✔ Accessible error message appears
-✔ Red icon shows
-✔ aria-invalid is added
-✔ Submission is blocked until user selects Yes or No
-✔ Works perfectly with your current form/jQuery setup
+      var errors = false,
+        recaptchaResponse,
+        $requiredInputs = $(e.target).find('[required]');
 
-⸻
+      // Validate normal required fields
+      $requiredInputs.each(function (index, item) {
+        if (!validateField($(item))) {
+          errors = true;
+        }
+      });
 
-✨ If you want, I can generate:
+      // Captcha validation
+      if ($captchaContainer.length) {
+        recaptchaResponse = $("[name='g-recaptcha-response']").val();
+        if (recaptchaResponse.length) {
+          $captchaContainer.removeClass('has-error');
+        } else {
+          $captchaContainer.addClass('has-error');
+          errors = true;
+        }
+      }
 
-✅ Cleaned and corrected full contact-form.js
-✅ Fully formatted with indentation
-✅ No typos, no missing brackets
+      // ---------------------------------------------------
+      // *** NEW: YES/NO CHECKBOX VALIDATION ***
+      // ---------------------------------------------------
+      var yesChecked = $('#edit-yes').is(':checked');
+      var noChecked = $('#edit-no').is(':checked');
 
-Just tell me “provide fully cleaned file” and I will rewrite it professionally while keeping your logic intact.
+      if (!yesChecked && !noChecked) {
+        // show error message
+        $(".yesno-error-msg").remove();
+        $('#edit-yes').closest('.form-item')
+          .append('<span class="error-msg yesno-error-msg">Please select Yes or No.</span>')
+          .addClass('has-error');
+
+        e.preventDefault();
+        return false;
+      } else {
+        // Clear error when valid
+        $(".yesno-error-msg").remove();
+        $('#edit-yes').closest('.form-item').removeClass('has-error');
+      }
+      // ---------------------------------------------------
+
+      if (errors) {
+        e.preventDefault();
+        return false;
+      }
+
+      // Submit UI state
+      $contactForm.addClass('submitting');
+      $contactForm.find('input[type="submit"]')
+        .attr('value', 'Submitting...')
+        .attr('disabled', 'disabled');
+
+      return true;
+    });
+  }
+
+  // ---------------------------------------------------
+  // VALIDATE FIELD FUNCTION
+  // ---------------------------------------------------
+  validateField = function (ctx) {
+
+    var $input = $(ctx),
+      value = $input.val(),
+      type = $input.attr('type'),
+      $fieldWrapper = $input.closest('.' + parentWrapperClass),
+      regex = {
+        'email': /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/,
+        'tel': /^\d{10}$/
+      },
+      valid = true;
+
+    // Required field validation
+    if ($input.attr('required') === 'required') {
+
+      if (!value || !value.length) {
+        $fieldWrapper.addClass('has-error');
+        valid = false;
+      } else {
+        $fieldWrapper.removeClass('has-error');
+      }
+    }
+
+    // Email validation
+    if (type === 'email' && value.length) {
+      if (!regex.email.test(value)) {
+        $fieldWrapper.addClass('has-error');
+        valid = false;
+      } else {
+        $fieldWrapper.removeClass('has-error');
+      }
+    }
+
+    // Phone validation
+    if ($input.attr('id') && $input.attr('id').indexOf('phone') !== -1) {
+      value = value.replace(/\D/g, '');
+      $input.val(value);
+
+      if (!regex.tel.test(value)) {
+        $fieldWrapper.addClass('has-error');
+        valid = false;
+      } else {
+        $fieldWrapper.removeClass('has-error');
+      }
+    }
+
+    return valid;
+  };
+});
