@@ -1,146 +1,199 @@
-Great — now that I understand your JS validation structure AND the accessibility requirement, here is the cleanest and correct way to solve this, with edits only inside your existing contact-form.js, and with comments exactly where the new code is added, as your manager requested.
+jQuery(document).ready(function () {
 
-⸻
+    'use strict';
 
-✅ Goal
+    var $ = jQuery,
+        $contactForm = $('.contact-form form, form.contact-form'),
+        $inputs,
+        $captchaContainer,
+        parentWrapperClass = 'form-item',
+        inputSelector = 'input[type=text], input[type=email], input[type=tel], textarea, select',
+        _validateField;
 
-For fields like:
-	•	Are you a registered Diversity Supplier? (Yes / No checkbox pair)
-	•	Opt out of being listed… (single checkbox)
+    if ($contactForm.length) {
 
-You must show an error message like:
+        // Disable native validation
+        $contactForm.attr('novalidate', 'novalidate');
+        $inputs = $contactForm.find(inputSelector);
+        $captchaContainer = $contactForm.find('div.captcha');
 
-“Please select a valid option for Are you a registered Diversity Supplier.”
+        // Trigger blur on load to show errors early
+        $inputs.blur();
 
-AND
-This error message must:
+        // Build required-field error messages
+        $inputs.each(function (index, item) {
+            var $input = $(item),
+                $fieldWrapper = $input.closest('.' + parentWrapperClass),
+                errorMsg = '',
+                currentFieldErrMsg = '';
 
-✔ appear under the checkbox
-✔ get .error-msg class
-✔ get .has-error class on wrapper
-✔ get role="alert"
-✔ be keyboard and screen-reader friendly
-✔ match the Zip Code error style (same red icon, same color)
+            if ($("label[for='" + $input.attr('id') + "']").length) {
+                currentFieldErrMsg = $("label[for='" + $input.attr('id') + "']").text() + ' field is required.';
+            } else {
+                currentFieldErrMsg = 'Please complete this mandatory field.';
+            }
 
-Your manager wants:
-✔ code changes only in contact-form.js
-✔ comments explaining your added code
+            if ($input.attr('required') === 'required') {
 
-⸻
+                if ($input.attr('type') === 'email') {
+                    errorMsg = 'Please enter a valid email address.';
+                } else {
+                    errorMsg = currentFieldErrMsg;
+                }
 
-✅ STEP 1 – Your checkbox selector
+                $fieldWrapper.append('<span class="error-msg">' + errorMsg + '</span>');
+            }
+        });
 
-You need a selector that targets the Yes/No field.
+        // Default dropdown placeholder
+        $contactForm.find('select option[value="_none"]').text('-- Select --');
 
-Your HTML (from your screenshot) looks like this:
+        // Add captcha error message
+        if ($captchaContainer.length) {
+            $captchaContainer.append('<span class="error-msg">Please complete reCaptcha challenge.</span>');
+        }
 
-input data-drupal-selector="edit-field-ar-0"
-type="checkbox" name="field_ar[0]"
+        // Run validation on keyup
+        $inputs.keyup(function (e) {
+            _validateField($(e.target));
+        });
 
-So field name = field_ar
+        // Run validation on change
+        $inputs.change(function (e) {
+            var $target = $(e.target);
+            if ($target.val()) {
+                _validateField($target);
+            }
+        });
 
-⸻
+        // FORM SUBMIT VALIDATION
+        $contactForm.on('submit', function (e) {
+            var errors = false,
+                recaptchaResponse = $('[name="g-recaptcha-response"]').val(),
+                $requiredInputs = $(e.target).find('input[required], textarea[required], select[required]');
 
-✅ STEP 2 – Add new validation inside _validateField()
+            // Validate all required fields
+            $requiredInputs.each(function (index, item) {
+                if (!_validateField($(item))) {
+                    errors = true;
+                }
+            });
 
-Add this inside _validateField() BEFORE the final return valid;
+            // CAPTCHA check
+            if ($captchaContainer.length) {
+                if (recaptchaResponse && recaptchaResponse.length) {
+                    $captchaContainer.removeClass('has-error');
+                } else {
+                    $captchaContainer.addClass('has-error');
+                    errors = true;
+                }
+            }
 
-📌 Add this block — fully commented — easy for your manager to review
+            // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            // >>> NEW CODE – YES/NO CHECKBOX VALIDATION (JIRA REQUIREMENT) >>>
+            // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-/*  
- * Accessibility Fix: Required Yes/No checkbox field  
- * Field: Are you a registered Diversity Supplier?  
- * Requirement: Must show specific error message if neither Yes nor No is selected  
- */
-if ($input.attr('name') === 'field_ar[0]') {
-    var $checkboxes = $('input[name="field_ar[0]"]');
-    var $wrapper = $checkboxes.closest('.' + parentWrapperClass);
+            var $ynCheckboxes = $('input[name="field_ar[0]"]'),
+                $ynWrapper = $ynCheckboxes.closest('.form-item');
 
-    // Remove existing error messages to avoid duplicates
-    $wrapper.find('.error-msg').remove();
+            // Remove old error
+            $ynWrapper.find('.error-msg').remove();
 
-    // If none selected → show error
-    if (!$checkboxes.is(':checked')) {
-        $wrapper.addClass('has-error');
+            if (!$ynCheckboxes.is(':checked')) {
 
-        // Add the SAME markup style as ZIP code
-        $wrapper.append(
-            '<span class="error-msg" role="alert">' +
-            'Please select a valid option for "Are you a registered Diversity Supplier?"' +
-            '</span>'
-        );
+                $ynWrapper.addClass('has-error');
 
-        valid = false;  // Mark field as invalid
-    } else {
-        // If one selected → remove error
-        $wrapper.removeClass('has-error');
-    }
-}
+                $ynWrapper.append(
+                    '<span class="error-msg" role="alert">Please select a valid option for "Are you a registered Diversity Supplier?".</span>'
+                );
 
+                errors = true;
+            } else {
+                $ynWrapper.removeClass('has-error');
+            }
 
-⸻
+            // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            // >>> END NEW CODE FOR JIRA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-✅ STEP 3 – Add the same logic inside submit handler
+            if (errors) {
+                e.preventDefault();
+                return false;
+            }
 
-Inside:
+        }); // END SUBMIT HANDLER
 
-$requiredInputs.each(function (index, item) {
+    } // END if $contactForm.length
 
-Add after other validations:
+    // MAIN VALIDATION FUNCTION
+    _validateField = function (ctx) {
 
-/*  
- * Accessibility Fix: Required Yes/No checkbox on form submit 
- */
-var $checkboxes = $('input[name="field_ar[0]"]');
-var $wrapper = $checkboxes.closest('.' + parentWrapperClass);
+        var $input = $(ctx),
+            value = $input.val(),
+            type = $input.attr('type'),
+            $fieldWrapper = $input.closest('.' + parentWrapperClass),
+            regex = {
+                'email': /[a-zA-Z0-9]\S+[a-zA-Z0-9]@[a-zA-Z0-9]+\.[a-zA-Z]+(\.[a-zA-Z]+)?/,
+                'tel': /^$begin:math:text$\?\(\[0\-9\]\{3\}\)$end:math:text$?[-.]?([0-9]{3})[-]?([0-9]{4})$/
+            },
+            valid = false;
 
-if ($checkboxes.length && !$checkboxes.is(':checked')) {
-    // Remove any duplicates
-    $wrapper.find('.error-msg').remove();
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // >>> NEW CODE – VALIDATION ON BLUR/KEYUP FOR YES/NO FIELD >>>>>>
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    $wrapper.addClass('has-error');
+        if ($input.attr('name') === 'field_ar[0]') {
 
-    $wrapper.append(
-        '<span class="error-msg" role="alert">' +
-        'Please select a valid option for "Are you a registered Diversity Supplier?"' +
-        '</span>'
-    );
+            var $checkboxes = $('input[name="field_ar[0]"]'),
+                $wrapper = $checkboxes.closest('.form-item');
 
-    errors = true;
-}
+            $wrapper.find('.error-msg').remove();
 
+            if (!$checkboxes.is(':checked')) {
 
-⸻
+                $wrapper.addClass('has-error');
 
-✅ RESULT
+                $wrapper.append(
+                    '<span class="error-msg" role="alert">Please select a valid option for "Are you a registered Diversity Supplier?".</span>'
+                );
 
-Now your required checkbox field behaves exactly like the Zip Code field:
+                return false;
 
-Screen reader behavior
+            } else {
+                $wrapper.removeClass('has-error');
+                return true;
+            }
+        }
 
-✔ announces error
-✔ announces which field is invalid
-✔ reads the message immediately after error appears
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // >>> END NEW YES/NO VALIDATION BLOCK >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-Visual behavior
+        // Standard text/email/phone validation
+        if (value && value.length) {
+            $fieldWrapper.removeClass('has-error');
+            valid = true;
+        } else {
+            $fieldWrapper.addClass('has-error');
+            valid = false;
+        }
 
-✔ same red icon
-✔ same .error-msg style
-✔ same .has-error outline
-✔ placed under the field wrapper exactly like text inputs
+        // EMAIL validation
+        if (type === 'email') {
+            valid = regex['email'].test(value);
+            $fieldWrapper.toggleClass('has-error', !valid);
+        }
 
-⸻
+        // PHONE validation
+        if ($input.attr('id').indexOf('phone') !== -1) {
+            if (value) {
+                $input.val($input.val().replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3'));
+            }
+            valid = regex['tel'].test(value);
+            $fieldWrapper.toggleClass('has-error', !valid);
+        }
 
-⭐ If you want, I can generate:
+        return valid;
+    };
 
-✔ A perfect JIRA comment
-
-✔ A perfect commit message
-
-✔ A patch file (.patch)
-
-✔ Code to make ANY checkbox group auto-validate
-
-✔ Drupal-specific improvement using Form API instead of JS
-
-Just tell me!
+});
