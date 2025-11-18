@@ -1,19 +1,31 @@
-// === Diversity Supplier Checkbox Validation ===
-var $diversityGroup = $('#edit-field-ar--2--wrapper');
-var $diversityError = $('#field-ar-error');
-var $diversityCheckboxes = $diversityGroup.find('input[type="checkbox"]');
+// ===== Drupal-style Error for Diversity Supplier Yes/No =====
+function addDrupalError($fieldset, message) {
 
-$contactForm.on('submit', function (e) {
+    // Add Drupal error class to fieldset
+    $fieldset.addClass('error');
 
-    var isChecked = $diversityCheckboxes.is(':checked');
+    // Remove old error if exists
+    $fieldset.find('.form-item--error-message').remove();
 
-    if (!isChecked) {
-        $diversityGroup.addClass('has-error');
-        $diversityError.text('Please select Yes or No for “Are you a registered Diversity Supplier?”.');
-        e.preventDefault();
-        return false;
-    } else {
-        $diversityGroup.removeClass('has-error');
-        $diversityError.text('');
-    }
-});
+    // Add Drupal-style error markup
+    $fieldset.append(
+        '<div class="form-item--error-message"><strong>' + message + '</strong></div>'
+    );
+}
+
+function clearDrupalError($fieldset) {
+    $fieldset.removeClass('error');
+    $fieldset.find('.form-item--error-message').remove();
+}
+
+// === Validation ===
+var $fieldset = $('#edit-field-ar--2--wrapper');
+var $checkboxes = $fieldset.find('input[type="checkbox"]');
+
+if (!$checkboxes.is(':checked')) {
+    addDrupalError($fieldset, 'Please select Yes or No for the “Are you a registered Diversity Supplier?” field.');
+    e.preventDefault();
+    return false;
+} else {
+    clearDrupalError($fieldset);
+}
