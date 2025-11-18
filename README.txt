@@ -1,26 +1,82 @@
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// >>> UPDATED YES/NO CHECKBOX VALIDATION — FINAL WORKING VERSION >>>
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// =============================
+// NEW CODE: Yes/No checkbox validation
+// Field machine name: field_ar
+// =============================
+var $yesNoField = $('input[name="field_ar[0]"]');
+var $yesNoWrapper = $yesNoField.closest('.form-item');
+var $yesNoError = $yesNoWrapper.find('.error-msg');
 
-var $ynWrapper = $('.form-item--field-ar'); // your wrapper class OR update to actual wrapper
-var $yes = $('#edit-field-ar-0-2');   // YES checkbox ID
-var $no  = $('#edit-field-ar-0-1');   // NO checkbox ID
+// Remove previous errors
+$yesNoWrapper.removeClass('has-error');
+$yesNoError.hide();
 
-// Remove previous error
-$ynWrapper.find('.error-msg').remove();
+// Count checked boxes
+var checkedCount = $('input[name="field_ar[0]"]:checked').length;
 
-if (!$yes.is(':checked') && !$no.is(':checked')) {
+// Validation rules:
+// ✔ If 1 checkbox selected (Yes OR No) → VALID
+// ❌ If 0 or 2 checkboxes selected → INVALID
+if (checkedCount !== 1) {
+    e.preventDefault();
+    $yesNoWrapper.addClass('has-error');
 
-    $ynWrapper.addClass('has-error');
-
-    $ynWrapper.append(
-        '<span class="error-msg" role="alert">Please select a valid option for "Are you a registered Diversity Supplier?".</span>'
-    );
+    // If no error span exists, append one
+    if (!$yesNoError.length) {
+        $yesNoWrapper.append(
+            '<span class="error-msg" role="alert">Please select a valid option from “Are you a registered Diversity Supplier?”.</span>'
+        );
+    } else {
+        $yesNoError.text('Please select a valid option from “Are you a registered Diversity Supplier?”.');
+        $yesNoError.show();
+    }
 
     errors = true;
-
-} else {
-
-    $ynWrapper.removeClass('has-error');
-
 }
+
+
+
+
+
+
+
+_validatefield = function (ctx) {
+
+    // ==========================
+    // NEW CODE START (YES/NO VALIDATION)
+    // ==========================
+
+    // Select the Yes/No checkbox group
+    var yesNoCheckboxes = ctx.find('input[name="field_ar[0]"]');
+
+    // Remove previous error state
+    yesNoCheckboxes.removeAttr('aria-invalid');
+    yesNoCheckboxes.closest('.js-form-item').removeClass('has-error');
+    ctx.find('#field-ar-error').remove();
+
+    // Check if none of the options are selected
+    if (!yesNoCheckboxes.is(':checked')) {
+
+        // Add error icon + text message (matches AC and ZIP error style)
+        yesNoCheckboxes
+            .attr('aria-invalid', 'true')
+            .closest('.js-form-item')
+            .addClass('has-error')
+            .append(
+                '<span class="error-msg" id="field-ar-error" role="alert">' +
+                '<span class="error-icon"></span>' +
+                'Please select a valid option for "Are you a registered Diversity Supplier?".' +
+                '</span>'
+            );
+
+        return false; // Stop form submission
+    }
+
+    // ==========================
+    // NEW CODE END
+    // ==========================
+
+
+    // Existing validation logic continues below…
+    // (Do NOT modify your other field validations)
+};
+
