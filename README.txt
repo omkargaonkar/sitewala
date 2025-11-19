@@ -1,4 +1,94 @@
 
+(function ($) {
+
+  'use strict';
+
+  Drupal.behaviors.accessibility = {
+    attach: function (context) {
+
+      //
+      // --- Fix: OneTrust Cookie Preference Center Dialog ---
+      //
+      const dialogInterval = setInterval(function () {
+
+        // This finds the real OneTrust dialog
+        const $dialog = $('#onetrust-pc-sdk [role="dialog"]');
+
+        if ($dialog.length) {
+
+          // Apply correct attributes
+          $dialog.attr({
+            'role': 'dialog',
+            'aria-modal': 'true',
+            'aria-label': 'Cookie Preference Center',
+            'tabindex': '0'
+          });
+
+          clearInterval(dialogInterval);
+        }
+
+      }, 200);
+
+      //
+      // --- Fix: Inner category items (tabindex + aria-label) ---
+      //
+      const otSelectors = [
+        '.ot-cat-item',
+        '.ot-abt-tab',
+        '.ot-tab-desc',
+        '.ot-tab-list'
+      ];
+
+      const itemInterval = setInterval(function () {
+
+        const $targets = $(otSelectors.join(','));
+
+        if ($targets.length) {
+
+          $targets.each(function () {
+            if (!$(this).is('a, button')) {
+              $(this).attr('tabindex', '0');
+              $(this).attr('aria-label', 'Cookie Preference Center');
+            }
+          });
+
+          clearInterval(itemInterval);
+        }
+
+      }, 200);
+
+      //
+      // DPM-15107 Table headers
+      //
+      $('table > thead > tr > th', context).attr('scope', 'col');
+      $('table > tbody > tr > th', context).attr('scope', 'row');
+
+      //
+      // Carousel live region
+      //
+      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
+
+    }
+  };
+
+})(jQuery);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (function accessibilityEW($) {
 
   'use strict';
