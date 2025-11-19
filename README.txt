@@ -12,6 +12,68 @@
       $('table > tbody > tr > th', context).attr('scope', 'row');
 
       // -------------------------------------
+      // DPM-18987: OneTrust Cookie Categories
+      // Add tabindex + aria-label
+      // -------------------------------------
+      const otSelectors = [
+        '.ot-cat-item',
+        '.ot-tab-desc',
+        '.ot-tab-list',
+        '.ot-abt-tab'
+      ];
+
+      $(otSelectors.join(','), context).each(function () {
+        // avoid interactive elements
+        if (!$(this).is('a, button')) {
+          $(this).attr('tabindex', '0');
+          $(this).attr('aria-label', 'Cookie Preference Center');
+        }
+      });
+
+      // -------------------------------------
+      // DPM-18987: OneTrust Modal Container
+      // Add dialog role + modal + tabindex
+      // -------------------------------------
+      $('.ot-pc-container', context)
+        .attr('role', 'dialog')
+        .attr('aria-modal', 'true')
+        .attr('aria-label', 'Cookie Preference Center')
+        .attr('tabindex', '0');
+
+      // -------------------------------------
+      // DPM-15100: Carousel Live Region
+      // -------------------------------------
+      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
+    }
+  };
+
+})(jQuery);
+
+
+
+
+
+
+
+
+
+
+
+
+(function accessibilityEW($) {
+
+  'use strict';
+
+  Drupal.behaviors.accessibility = {
+    attach: function (context) {
+
+      // -------------------------------------
+      // DPM-15107: Accessibility Table Elements
+      // -------------------------------------
+      $('table > thead > tr > th', context).attr('scope', 'col');
+      $('table > tbody > tr > th', context).attr('scope', 'row');
+
+      // -------------------------------------
       // DPM-18987: OneTrust Cookie Categories - tabindex + aria-label
       // -------------------------------------
       const otSelectors = [
