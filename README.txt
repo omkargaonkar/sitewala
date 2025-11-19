@@ -1,3 +1,41 @@
+// DPM-18987: OneTrust Cookie Modal - Add tabindex + aria-label
+const otSelectors = [
+  '.ot-cat-item',
+  '.ot-tab-desc',
+  '.ot-tab-list',
+  '.ot-abt-tab'
+];
+
+$(otSelectors.join(','), context).each(function () {
+
+  // Skip interactive elements
+  if (!$(this).is('a, button')) {
+
+    // Add tabindex
+    $(this).attr('tabindex', '0');
+
+    // Add aria-label using visible text
+    let text = $(this).text().trim();
+
+    if (text.length > 0) {
+      $(this).attr('aria-label', text);
+    } else {
+      // fallback label for empty items
+      $(this).attr('aria-label', 'Cookie setting option');
+    }
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
 (function accessibilityEW($) {
 
   "use strict";
