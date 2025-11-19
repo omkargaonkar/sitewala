@@ -1,3 +1,111 @@
+
+(function accessibilityEW($) {
+
+  'use strict';
+
+  Drupal.behaviors.accessibility = {
+    attach: function (context) {
+
+      // ---------------------------------------------------
+      // DPM-15107: Accessibility Table Headers
+      // ---------------------------------------------------
+      $('table > thead > tr > th', context).attr('scope', 'col');
+      $('table > tbody > tr > th', context).attr('scope', 'row');
+
+      // ---------------------------------------------------
+      // OneTrust selectors needing tabindex + aria-label
+      // ---------------------------------------------------
+      const otSelectors = [
+        '.ot-cat-item',
+        '.ot-tab-desc',
+        '.ot-tab-list',
+        '.ot-abt-tab'
+      ];
+
+      // Initial pass for items already on page
+      $(otSelectors.join(','), context).each(function () {
+        if (!$(this).is('a, button')) {
+          $(this).attr('tabindex', '0');
+          $(this).attr('aria-label', 'Cookie Preference Center');
+        }
+      });
+
+      // ---------------------------------------------------
+      // Handle parent dialog container (role + modal + tabindex)
+      // ---------------------------------------------------
+      (function () {
+
+        const dialogSelector = [
+          '.ot-pc-container',
+          '.ot-pc-content',
+          '.ot-sdk-container',
+          '[role="dialog"]',
+          '[aria-label="Cookie Preference Center"]'
+        ].join(',');
+
+        function setDialogAttrs($el) {
+          if (!$el || !$el.length) return;
+
+          $el.attr('role', 'dialog');
+          $el.attr('aria-modal', 'true');
+          $el.attr('aria-label', 'Cookie Preference Center');
+          $el.attr('tabindex', '0'); // <-- Missing part now added
+        }
+
+        // Initial pass (if dialog is already present)
+        const $firstDialog = $(dialogSelector, context).filter(':visible').first();
+        if ($firstDialog.length) {
+          setDialogAttrs($firstDialog);
+        }
+
+        // Interval — because OneTrust loads content asynchronously
+        const dialogInterval = setInterval(function () {
+          const $dialog = $(dialogSelector).filter(':visible').first();
+          if ($dialog.length) {
+            setDialogAttrs($dialog);
+            clearInterval(dialogInterval);
+          }
+        }, 250);
+
+      })();
+
+      // ---------------------------------------------------
+      // Interval for dynamically loaded OneTrust items
+      // ---------------------------------------------------
+      const interval = setInterval(() => {
+
+        const $targets = $(otSelectors.join(','));
+
+        if ($targets.length > 0) {
+          $targets.each(function () {
+            if (!$(this).is('a, button')) {
+              $(this).attr('tabindex', '0');
+              $(this).attr('aria-label', 'Cookie Preference Center');
+            }
+          });
+          clearInterval(interval);
+        }
+
+      }, 250);
+
+      // ---------------------------------------------------
+      // DPM-15100: Carousel Indicate Live Region
+      // ---------------------------------------------------
+      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
+
+    }
+  };
+
+})(jQuery);
+
+
+
+
+
+
+
+
+
 // Ensure the parent dialog is focusable and has correct aria-modal
 (function () {
   const dialogSelector = [
