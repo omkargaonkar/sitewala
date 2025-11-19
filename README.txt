@@ -1,3 +1,51 @@
+// Ensure the parent dialog is focusable and has correct aria-modal
+(function () {
+  const dialogSelector = [
+    '.ot-pc-container',
+    '.ot-pc-content',
+    '.ot-sdk-container',
+    '[role="dialog"]',
+    '[aria-label="Cookie Preference Center"]'
+  ].join(',');
+
+  function setDialogAttrs($el) {
+    if (!$el || !$el.length) return;
+    // set/fix attributes
+    $el.attr('role', 'dialog');
+    $el.attr('aria-modal', 'true');               // fixes malformed aria-modal if present
+    $el.attr('aria-label', 'Cookie Preference Center');
+    $el.attr('tabindex', '0');                    // <-- the missing bit you mentioned
+
+    // optional: move focus into the dialog (uncomment if desired)
+    // if (!$.contains($el[0], document.activeElement)) { $el.focus(); }
+  }
+
+  // initial pass (if already present)
+  const $first = $(dialogSelector, context).filter(':visible').first();
+  if ($first.length) {
+    setDialogAttrs($first);
+  }
+
+  // fallback for late-loaded dialogs (OneTrust)
+  const dialogInterval = setInterval(function () {
+    const $found = $(dialogSelector).filter(':visible').first();
+    if ($found.length) {
+      setDialogAttrs($found);
+      clearInterval(dialogInterval);
+    }
+  }, 250);
+})();
+
+
+
+
+
+
+
+
+
+
+
 
 (function accessibilityEW($) {
 
