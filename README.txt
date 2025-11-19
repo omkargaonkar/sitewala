@@ -1,31 +1,53 @@
-// ===== Drupal-style Error for Diversity Supplier Yes/No =====
-function addDrupalError($fieldset, message) {
+(function accessibilityEW($) {
 
-    // Add Drupal error class to fieldset
-    $fieldset.addClass('error');
+  "use strict";
 
-    // Remove old error if exists
-    $fieldset.find('.form-item--error-message').remove();
+  Drupal.behaviors.accessibility = {
+    attach: function (context) {
 
-    // Add Drupal-style error markup
-    $fieldset.append(
-        '<div class="form-item--error-message"><strong>' + message + '</strong></div>'
-    );
-}
+      // -------------------------------------
+      // DPM-15107: Accessibility Table Elements
+      // -------------------------------------
+      $('table > thead > tr > th', context).attr('scope', 'col');
+      $('table > tbody > tr > th', context).attr('scope', 'row');
 
-function clearDrupalError($fieldset) {
-    $fieldset.removeClass('error');
-    $fieldset.find('.form-item--error-message').remove();
-}
+      // -------------------------------------
+      // DPM-18987: OneTrust Cookie Modal - Add tabindex
+      // -------------------------------------
+      // Add tabindex="0" to specific OT classes
+      const otSelectors = [
+        '.ot-cat-item',
+        '.ot-tab-desc',
+        '.ot-tab-list',
+        '.ot-abt-tab'
+      ];
 
-// === Validation ===
-var $fieldset = $('#edit-field-ar--2--wrapper');
-var $checkboxes = $fieldset.find('input[type="checkbox"]');
+      $(otSelectors.join(','), context).each(function () {
+        // Avoid adding tabindex on links/buttons (already focusable)
+        if (!$(this).is('a, button')) {
+          $(this).attr('tabindex', '0');
+        }
+      });
 
-if (!$checkboxes.is(':checked')) {
-    addDrupalError($fieldset, 'Please select Yes or No for the “Are you a registered Diversity Supplier?” field.');
-    e.preventDefault();
-    return false;
-} else {
-    clearDrupalError($fieldset);
-}
+      // If OneTrust loads later, run a fallback interval
+      const interval = setInterval(() => {
+        const $targets = $(otSelectors.join(','));
+        if ($targets.length > 0) {
+          $targets.each(function () {
+            if (!$(this).is('a, button')) {
+              $(this).attr('tabindex', '0');
+            }
+          });
+          clearInterval(interval);
+        }
+      }, 250);
+
+      // -------------------------------------
+      // DPM-15100: Carousel Live Region
+      // -------------------------------------
+      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
+
+    }
+  };
+
+})(jQuery);
