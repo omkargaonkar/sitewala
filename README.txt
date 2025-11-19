@@ -1,3 +1,109 @@
+
+(function accessibilityEW($) {
+
+  'use strict';
+
+  Drupal.behaviors.accessibility = {
+    attach: function (context) {
+
+      // -------------------------------------
+      // DPM-15107: Accessibility Table Elements
+      // -------------------------------------
+      $('table > thead > tr > th', context).attr('scope', 'col');
+      $('table > tbody > tr > th', context).attr('scope', 'row');
+
+      // -------------------------------------
+      // Selectors for OneTrust elements
+      // -------------------------------------
+      const otSelectors = [
+        '.ot-cat-item',
+        '.ot-tab-desc',
+        '.ot-tab-list',
+        '.ot-abt-tab'
+      ];
+
+      // -------------------------------------
+      // Apply tabindex + aria-label (initial pass)
+      // -------------------------------------
+      $(otSelectors.join(','), context).each(function () {
+        if (!$(this).is('a, button')) {
+          $(this).attr('tabindex', '0');
+          $(this).attr('aria-label', 'Cookie Preference Center');
+        }
+      });
+
+      // -------------------------------------
+      // Apply dialog role to modal container
+      // -------------------------------------
+      $('.ot-pc-container', context)
+        .attr('role', 'dialog')
+        .attr('aria-modal', 'true')
+        .attr('aria-label', 'Cookie Preference Center')
+        .attr('tabindex', '0');
+
+      // -------------------------------------
+      // INTERVAL — REQUIRED for late-loaded content
+      // -------------------------------------
+      const interval = setInterval(() => {
+
+        const $targets = $(otSelectors.join(','));
+
+        if ($targets.length > 0) {
+
+          $targets.each(function () {
+            if (!$(this).is('a, button')) {
+              $(this).attr('tabindex', '0');
+              $(this).attr('aria-label', 'Cookie Preference Center');
+            }
+          });
+
+          // Apply again to dialog container if loaded late
+          $('.ot-pc-container')
+            .attr('role', 'dialog')
+            .attr('aria-modal', 'true')
+            .attr('aria-label', 'Cookie Preference Center')
+            .attr('tabindex', '0');
+
+          clearInterval(interval);
+        }
+
+      }, 250);
+
+      // -------------------------------------
+      // DPM-15100: Carousel Live Region
+      // -------------------------------------
+      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
+    }
+  };
+
+})(jQuery);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (function accessibilityEW($) {
 
   'use strict';
