@@ -1,3 +1,89 @@
+
+(function accessibilityEW($) {
+
+  'use strict';
+
+  Drupal.behaviors.accessibility = {
+    attach: function (context) {
+
+      // DPM-15107: Table accessibility
+      $('table > thead > tr > th', context).attr('scope', 'col');
+      $('table > tbody > tr > th', context).attr('scope', 'row');
+
+      // DPM-18987: OneTrust Cookie Modal Elements
+      const otSelectors = [
+        '.ot-cat-item',
+        '.ot-tab-desc',
+        '.ot-tab-list',
+        '.ot-abt-tab'
+      ];
+
+      // Add tabindex + aria-label
+      $(otSelectors.join(','), context).each(function () {
+        if (!$(this).is('a, button')) {
+          $(this).attr('tabindex', '0');
+          $(this).attr('aria-label', 'Cookie Preference Center');
+        }
+      });
+
+      // Add role="dialog" to the COOKIE MODAL container only
+      const dialogContainer = $('.ot-pc-container, .ot-pc-content, .ot-sdk-container', context).first();
+
+      if (dialogContainer.length) {
+        dialogContainer.attr('role', 'dialog');
+        dialogContainer.attr('tabindex', '0');
+        dialogContainer.attr('aria-label', 'Cookie Preference Center');
+      }
+
+      // Fallback for late-loaded OneTrust content
+      const interval = setInterval(() => {
+
+        const $targets = $(otSelectors.join(','));
+        if ($targets.length > 0) {
+
+          $targets.each(function () {
+            if (!$(this).is('a, button')) {
+              $(this).attr('tabindex', '0');
+              $(this).attr('aria-label', 'Cookie Preference Center');
+            }
+          });
+
+          // Ensure dialog role is applied even after async load
+          const dialog = $('.ot-pc-container, .ot-pc-content, .ot-sdk-container').first();
+          if (dialog.length) {
+            dialog.attr('role', 'dialog');
+            dialog.attr('tabindex', '0');
+            dialog.attr('aria-label', 'Cookie Preference Center');
+          }
+
+          clearInterval(interval);
+        }
+      }, 250);
+
+      // DPM-15100: Carousel live region
+      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
+
+    }
+  };
+
+})(jQuery);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // DPM-18987: OneTrust Cookie Modal - Add tabindex + aria-label
 const otSelectors = [
   '.ot-cat-item',
