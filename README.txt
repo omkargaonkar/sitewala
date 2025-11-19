@@ -1,4 +1,22 @@
 
+
+// Ensure category switch items are focusable
+const switchInterval = setInterval(function () {
+
+  const $switchers = $('.category-menu-switch-handler');
+
+  if ($switchers.length) {
+
+    $switchers.each(function () {
+      $(this).attr('tabindex', '0');
+    });
+
+    clearInterval(switchInterval);
+  }
+
+}, 200);
+
+
 (function ($) {
 
   'use strict';
