@@ -1,4 +1,43 @@
 
+const otSelectors = [
+    ".ot-cat-item",
+    ".ot-abt-tab",
+    ".ot-tab-desc",
+    ".ot-tab-list",
+    ".ot-sdk-columns",
+    ".category-menu-switch-handler"
+];
+
+const itemInterval = setInterval(function () {
+    const $targets = $(otSelectors.join(","), context);
+
+    if ($targets.length) {
+        $targets.each(function () {
+
+            const $el = $(this);
+
+            // These selectors must have tabindex -1
+            if ($el.is(".ot-tab-list, .category-menu-switch-handler")) {
+                $el.attr("tabindex", "-1");
+            } else {
+                // All others get tabindex=0 unless they are naturally focusable
+                if (!$el.is("a, button")) {
+                    $el.attr("tabindex", "0");
+                }
+            }
+
+            // Add aria-label for non-focusable elements changed to focusable
+            if ($el.attr("tabindex") === "0") {
+                $el.attr("aria-label", "Cookie Preference Center");
+            }
+        });
+
+        clearInterval(itemInterval);
+    }
+}, 200);
+
+
+
 
 // Ensure category switch items are focusable
 const switchInterval = setInterval(function () {
