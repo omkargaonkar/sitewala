@@ -1,660 +1,149 @@
+Perfect 👍
+Below is a detailed 2–3 page resume (long-form, professional, ATS-friendly) built entirely new and focused strictly on SQL, PostgreSQL, OOP concepts, JavaScript, PHP, and UNIX experience.
+You can later trim or format it in Word/PDF as needed.
+
+⸻
+
+OMKAR GAONKAR
+
+Senior Software / Backend Developer
+
+📍 India
+📞 +91-XXXXXXXXXX
+📧 omkargaonkar@email.com
+🔗 GitHub | LinkedIn (optional)
+
+⸻
 
-const otSelectors = [
-    ".ot-cat-item",
-    ".ot-abt-tab",
-    ".ot-tab-desc",
-    ".ot-tab-list",
-    ".ot-sdk-columns",
-    ".category-menu-switch-handler"
-];
+PROFESSIONAL SUMMARY
+
+Results-driven Software Developer with strong expertise in PHP, JavaScript, SQL, and PostgreSQL, and a deep understanding of Object-Oriented Programming (OOP) principles. Experienced in developing, enhancing, and maintaining database-driven web applications in UNIX/Linux environments. Proven ability to design scalable backend systems, optimize database performance, and write clean, maintainable code following industry best practices. Adept at collaborating with cross-functional teams and delivering reliable software solutions.
 
-const itemInterval = setInterval(function () {
-    const $targets = $(otSelectors.join(","), context);
+⸻
 
-    if ($targets.length) {
-        $targets.each(function () {
+CORE TECHNICAL SKILLS
 
-            const $el = $(this);
+Programming & Scripting
+	•	PHP (OOP-based development)
+	•	JavaScript (client-side validation, DOM manipulation, AJAX)
+
+Database Technologies
+	•	SQL (complex queries, joins, subqueries, indexes)
+	•	PostgreSQL (schema design, optimization, performance tuning)
 
-            // These selectors must have tabindex -1
-            if ($el.is(".ot-tab-list, .category-menu-switch-handler")) {
-                $el.attr("tabindex", "-1");
-            } else {
-                // All others get tabindex=0 unless they are naturally focusable
-                if (!$el.is("a, button")) {
-                    $el.attr("tabindex", "0");
-                }
-            }
+Software Engineering Concepts
+	•	Object-Oriented Programming (OOP)
+	•	Encapsulation
+	•	Inheritance
+	•	Polymorphism
+	•	Abstraction
+	•	MVC Architecture
+	•	Code Reusability & Design Patterns
 
-            // Add aria-label for non-focusable elements changed to focusable
-            if ($el.attr("tabindex") === "0") {
-                $el.attr("aria-label", "Cookie Preference Center");
-            }
-        });
+Operating Systems
+	•	UNIX / Linux
+	•	Shell commands
+	•	File & directory permissions
+	•	Cron jobs
+	•	Process monitoring
 
-        clearInterval(itemInterval);
-    }
-}, 200);
+Web & Backend Technologies
+	•	RESTful API development
+	•	Server-side validation
+	•	Session & authentication handling
+	•	Basic Apache / Nginx configuration
 
+Tools & Utilities
+	•	Git (version control)
+	•	pgAdmin, phpMyAdmin
+	•	Linux command-line utilities
+	•	Debugging & logging tools
 
+⸻
 
+PROFESSIONAL EXPERIENCE
 
-// Ensure category switch items are focusable
-const switchInterval = setInterval(function () {
+Software Developer
 
-  const $switchers = $('.category-menu-switch-handler');
+Company Name, India
+MM/YYYY – Present
+	•	Designed, developed, and maintained backend applications using PHP with strong OOP principles.
+	•	Implemented modular and reusable code using object-oriented design patterns.
+	•	Developed and optimized PostgreSQL database schemas, tables, and relationships.
+	•	Wrote advanced SQL queries involving joins, subqueries, functions, and indexing to improve application performance.
+	•	Integrated JavaScript for dynamic UI behavior, form validation, and asynchronous data handling.
+	•	Worked extensively in UNIX/Linux environments for application deployment and server maintenance.
+	•	Managed application logs, cron jobs, and file permissions to ensure system reliability.
+	•	Collaborated with QA and frontend teams to debug issues and enhance application stability.
+	•	Refactored legacy codebases to improve maintainability, readability, and execution speed.
 
-  if ($switchers.length) {
+⸻
 
-    $switchers.each(function () {
-      $(this).attr('tabindex', '0');
-    });
+DETAILED PROJECT EXPERIENCE
 
-    clearInterval(switchInterval);
-  }
+Enterprise Web Application
+	•	Developed a scalable backend using PHP and PostgreSQL.
+	•	Implemented OOP-based architecture following MVC principles.
+	•	Designed normalized database schemas and optimized queries for large datasets.
+	•	Implemented user authentication, authorization, and role-based access control.
+	•	Improved performance by optimizing SQL queries and database indexing.
 
-}, 200);
+Database Management & Reporting System
+	•	Built reporting modules using complex SQL and PostgreSQL functions.
+	•	Created stored queries for data analysis and operational reporting.
+	•	Ensured data integrity and consistency across multiple modules.
 
+UNIX-Based Automation & Maintenance
+	•	Created shell scripts for:
+	•	Automated database backups
+	•	Log rotation
+	•	System health monitoring
+	•	Scheduled jobs using cron to reduce manual operational effort.
+	•	Managed server-level configurations and permissions.
 
-(function ($) {
+⸻
 
-  'use strict';
+KEY RESPONSIBILITIES & ACHIEVEMENTS
+	•	Successfully delivered multiple backend modules within project deadlines.
+	•	Reduced database query execution time through optimization techniques.
+	•	Improved application stability by implementing proper exception handling and logging.
+	•	Actively participated in code reviews to ensure coding standards and best practices.
+	•	Provided technical support and documentation for deployed applications.
 
-  Drupal.behaviors.accessibility = {
-    attach: function (context) {
+⸻
 
-      //
-      // --- Fix: OneTrust Cookie Preference Center Dialog ---
-      //
-      const dialogInterval = setInterval(function () {
+EDUCATION
 
-        // This finds the real OneTrust dialog
-        const $dialog = $('#onetrust-pc-sdk [role="dialog"]');
+Bachelor’s Degree / Diploma in Computer Science / IT
+Institute / University Name
+Year of Completion
 
-        if ($dialog.length) {
+⸻
 
-          // Apply correct attributes
-          $dialog.attr({
-            'role': 'dialog',
-            'aria-modal': 'true',
-            'aria-label': 'Cookie Preference Center',
-            'tabindex': '0'
-          });
+SOFT SKILLS
+	•	Strong problem-solving abilities
+	•	Analytical thinking
+	•	Effective communication
+	•	Team collaboration
+	•	Time management
 
-          clearInterval(dialogInterval);
-        }
+⸻
 
-      }, 200);
+DECLARATION
 
-      //
-      // --- Fix: Inner category items (tabindex + aria-label) ---
-      //
-      const otSelectors = [
-        '.ot-cat-item',
-        '.ot-abt-tab',
-        '.ot-tab-desc',
-        '.ot-tab-list'
-      ];
+I hereby declare that the information furnished above is true and complete to the best of my knowledge and belief.
 
-      const itemInterval = setInterval(function () {
+Omkar Gaonkar
 
-        const $targets = $(otSelectors.join(','));
+⸻
 
-        if ($targets.length) {
+✅ Next Options (Tell me what you want)
 
-          $targets.each(function () {
-            if (!$(this).is('a, button')) {
-              $(this).attr('tabindex', '0');
-              $(this).attr('aria-label', 'Cookie Preference Center');
-            }
-          });
+I can:
+	•	Convert this into exact 2-page or 3-page Word/PDF
+	•	Tailor it for PHP Developer / Backend Engineer / Full Stack roles
+	•	Adjust language for MNC / Product-based companies
+	•	Add years of experience (Fresher / 3+ / 5+ years)
+	•	Make it 100% ATS-optimized
 
-          clearInterval(itemInterval);
-        }
-
-      }, 200);
-
-      //
-      // DPM-15107 Table headers
-      //
-      $('table > thead > tr > th', context).attr('scope', 'col');
-      $('table > tbody > tr > th', context).attr('scope', 'row');
-
-      //
-      // Carousel live region
-      //
-      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
-
-    }
-  };
-
-})(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(function accessibilityEW($) {
-
-  'use strict';
-
-  Drupal.behaviors.accessibility = {
-    attach: function (context) {
-
-      // ---------------------------------------------------
-      // DPM-15107: Accessibility Table Headers
-      // ---------------------------------------------------
-      $('table > thead > tr > th', context).attr('scope', 'col');
-      $('table > tbody > tr > th', context).attr('scope', 'row');
-
-      // ---------------------------------------------------
-      // OneTrust selectors needing tabindex + aria-label
-      // ---------------------------------------------------
-      const otSelectors = [
-        '.ot-cat-item',
-        '.ot-tab-desc',
-        '.ot-tab-list',
-        '.ot-abt-tab'
-      ];
-
-      // Initial pass for items already on page
-      $(otSelectors.join(','), context).each(function () {
-        if (!$(this).is('a, button')) {
-          $(this).attr('tabindex', '0');
-          $(this).attr('aria-label', 'Cookie Preference Center');
-        }
-      });
-
-      // ---------------------------------------------------
-      // Handle parent dialog container (role + modal + tabindex)
-      // ---------------------------------------------------
-      (function () {
-
-        const dialogSelector = [
-          '.ot-pc-container',
-          '.ot-pc-content',
-          '.ot-sdk-container',
-          '[role="dialog"]',
-          '[aria-label="Cookie Preference Center"]'
-        ].join(',');
-
-        function setDialogAttrs($el) {
-          if (!$el || !$el.length) return;
-
-          $el.attr('role', 'dialog');
-          $el.attr('aria-modal', 'true');
-          $el.attr('aria-label', 'Cookie Preference Center');
-          $el.attr('tabindex', '0'); // <-- Missing part now added
-        }
-
-        // Initial pass (if dialog is already present)
-        const $firstDialog = $(dialogSelector, context).filter(':visible').first();
-        if ($firstDialog.length) {
-          setDialogAttrs($firstDialog);
-        }
-
-        // Interval — because OneTrust loads content asynchronously
-        const dialogInterval = setInterval(function () {
-          const $dialog = $(dialogSelector).filter(':visible').first();
-          if ($dialog.length) {
-            setDialogAttrs($dialog);
-            clearInterval(dialogInterval);
-          }
-        }, 250);
-
-      })();
-
-      // ---------------------------------------------------
-      // Interval for dynamically loaded OneTrust items
-      // ---------------------------------------------------
-      const interval = setInterval(() => {
-
-        const $targets = $(otSelectors.join(','));
-
-        if ($targets.length > 0) {
-          $targets.each(function () {
-            if (!$(this).is('a, button')) {
-              $(this).attr('tabindex', '0');
-              $(this).attr('aria-label', 'Cookie Preference Center');
-            }
-          });
-          clearInterval(interval);
-        }
-
-      }, 250);
-
-      // ---------------------------------------------------
-      // DPM-15100: Carousel Indicate Live Region
-      // ---------------------------------------------------
-      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
-
-    }
-  };
-
-})(jQuery);
-
-
-
-
-
-
-
-
-
-// Ensure the parent dialog is focusable and has correct aria-modal
-(function () {
-  const dialogSelector = [
-    '.ot-pc-container',
-    '.ot-pc-content',
-    '.ot-sdk-container',
-    '[role="dialog"]',
-    '[aria-label="Cookie Preference Center"]'
-  ].join(',');
-
-  function setDialogAttrs($el) {
-    if (!$el || !$el.length) return;
-    // set/fix attributes
-    $el.attr('role', 'dialog');
-    $el.attr('aria-modal', 'true');               // fixes malformed aria-modal if present
-    $el.attr('aria-label', 'Cookie Preference Center');
-    $el.attr('tabindex', '0');                    // <-- the missing bit you mentioned
-
-    // optional: move focus into the dialog (uncomment if desired)
-    // if (!$.contains($el[0], document.activeElement)) { $el.focus(); }
-  }
-
-  // initial pass (if already present)
-  const $first = $(dialogSelector, context).filter(':visible').first();
-  if ($first.length) {
-    setDialogAttrs($first);
-  }
-
-  // fallback for late-loaded dialogs (OneTrust)
-  const dialogInterval = setInterval(function () {
-    const $found = $(dialogSelector).filter(':visible').first();
-    if ($found.length) {
-      setDialogAttrs($found);
-      clearInterval(dialogInterval);
-    }
-  }, 250);
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-(function accessibilityEW($) {
-
-  'use strict';
-
-  Drupal.behaviors.accessibility = {
-    attach: function (context) {
-
-      // -------------------------------------
-      // DPM-15107: Accessibility Table Elements
-      // -------------------------------------
-      $('table > thead > tr > th', context).attr('scope', 'col');
-      $('table > tbody > tr > th', context).attr('scope', 'row');
-
-      // -------------------------------------
-      // Selectors for OneTrust elements
-      // -------------------------------------
-      const otSelectors = [
-        '.ot-cat-item',
-        '.ot-tab-desc',
-        '.ot-tab-list',
-        '.ot-abt-tab'
-      ];
-
-      // -------------------------------------
-      // Apply tabindex + aria-label (initial pass)
-      // -------------------------------------
-      $(otSelectors.join(','), context).each(function () {
-        if (!$(this).is('a, button')) {
-          $(this).attr('tabindex', '0');
-          $(this).attr('aria-label', 'Cookie Preference Center');
-        }
-      });
-
-      // -------------------------------------
-      // Apply dialog role to modal container
-      // -------------------------------------
-      $('.ot-pc-container', context)
-        .attr('role', 'dialog')
-        .attr('aria-modal', 'true')
-        .attr('aria-label', 'Cookie Preference Center')
-        .attr('tabindex', '0');
-
-      // -------------------------------------
-      // INTERVAL — REQUIRED for late-loaded content
-      // -------------------------------------
-      const interval = setInterval(() => {
-
-        const $targets = $(otSelectors.join(','));
-
-        if ($targets.length > 0) {
-
-          $targets.each(function () {
-            if (!$(this).is('a, button')) {
-              $(this).attr('tabindex', '0');
-              $(this).attr('aria-label', 'Cookie Preference Center');
-            }
-          });
-
-          // Apply again to dialog container if loaded late
-          $('.ot-pc-container')
-            .attr('role', 'dialog')
-            .attr('aria-modal', 'true')
-            .attr('aria-label', 'Cookie Preference Center')
-            .attr('tabindex', '0');
-
-          clearInterval(interval);
-        }
-
-      }, 250);
-
-      // -------------------------------------
-      // DPM-15100: Carousel Live Region
-      // -------------------------------------
-      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
-    }
-  };
-
-})(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(function accessibilityEW($) {
-
-  'use strict';
-
-  Drupal.behaviors.accessibility = {
-    attach: function (context) {
-
-      // -------------------------------------
-      // DPM-15107: Accessibility Table Elements
-      // -------------------------------------
-      $('table > thead > tr > th', context).attr('scope', 'col');
-      $('table > tbody > tr > th', context).attr('scope', 'row');
-
-      // -------------------------------------
-      // DPM-18987: OneTrust Cookie Categories
-      // Add tabindex + aria-label
-      // -------------------------------------
-      const otSelectors = [
-        '.ot-cat-item',
-        '.ot-tab-desc',
-        '.ot-tab-list',
-        '.ot-abt-tab'
-      ];
-
-      $(otSelectors.join(','), context).each(function () {
-        // avoid interactive elements
-        if (!$(this).is('a, button')) {
-          $(this).attr('tabindex', '0');
-          $(this).attr('aria-label', 'Cookie Preference Center');
-        }
-      });
-
-      // -------------------------------------
-      // DPM-18987: OneTrust Modal Container
-      // Add dialog role + modal + tabindex
-      // -------------------------------------
-      $('.ot-pc-container', context)
-        .attr('role', 'dialog')
-        .attr('aria-modal', 'true')
-        .attr('aria-label', 'Cookie Preference Center')
-        .attr('tabindex', '0');
-
-      // -------------------------------------
-      // DPM-15100: Carousel Live Region
-      // -------------------------------------
-      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
-    }
-  };
-
-})(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-(function accessibilityEW($) {
-
-  'use strict';
-
-  Drupal.behaviors.accessibility = {
-    attach: function (context) {
-
-      // -------------------------------------
-      // DPM-15107: Accessibility Table Elements
-      // -------------------------------------
-      $('table > thead > tr > th', context).attr('scope', 'col');
-      $('table > tbody > tr > th', context).attr('scope', 'row');
-
-      // -------------------------------------
-      // DPM-18987: OneTrust Cookie Categories - tabindex + aria-label
-      // -------------------------------------
-      const otSelectors = [
-        '.ot-cat-item',
-        '.ot-tab-desc',
-        '.ot-tab-list',
-        '.ot-abt-tab'
-      ];
-
-      $(otSelectors.join(','), context).each(function () {
-        if (!$(this).is('a, button')) {
-          $(this).attr('tabindex', '0');
-          $(this).attr('aria-label', 'Cookie Preference Center');
-        }
-      });
-
-      // -------------------------------------
-      // DPM-18987: OneTrust Modal Container - role="dialog"
-      // -------------------------------------
-      // Pick the correct modal container (OneTrust root)
-      $('.ot-pc-container', context)
-        .attr('role', 'dialog')
-        .attr('aria-modal', 'true')
-        .attr('aria-label', 'Cookie Preference Center')
-        .attr('tabindex', '0');
-
-      // -------------------------------------
-      // DPM-15100: Carousel Live Region
-      // -------------------------------------
-      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
-
-    }
-  };
-
-})(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(function accessibilityEW($) {
-
-  'use strict';
-
-  Drupal.behaviors.accessibility = {
-    attach: function (context) {
-
-      // DPM-15107: Table accessibility
-      $('table > thead > tr > th', context).attr('scope', 'col');
-      $('table > tbody > tr > th', context).attr('scope', 'row');
-
-      // DPM-18987: OneTrust Cookie Modal Elements
-      const otSelectors = [
-        '.ot-cat-item',
-        '.ot-tab-desc',
-        '.ot-tab-list',
-        '.ot-abt-tab'
-      ];
-
-      // Add tabindex + aria-label
-      $(otSelectors.join(','), context).each(function () {
-        if (!$(this).is('a, button')) {
-          $(this).attr('tabindex', '0');
-          $(this).attr('aria-label', 'Cookie Preference Center');
-        }
-      });
-
-      // Add role="dialog" to the COOKIE MODAL container only
-      const dialogContainer = $('.ot-pc-container, .ot-pc-content, .ot-sdk-container', context).first();
-
-      if (dialogContainer.length) {
-        dialogContainer.attr('role', 'dialog');
-        dialogContainer.attr('tabindex', '0');
-        dialogContainer.attr('aria-label', 'Cookie Preference Center');
-      }
-
-      // Fallback for late-loaded OneTrust content
-      const interval = setInterval(() => {
-
-        const $targets = $(otSelectors.join(','));
-        if ($targets.length > 0) {
-
-          $targets.each(function () {
-            if (!$(this).is('a, button')) {
-              $(this).attr('tabindex', '0');
-              $(this).attr('aria-label', 'Cookie Preference Center');
-            }
-          });
-
-          // Ensure dialog role is applied even after async load
-          const dialog = $('.ot-pc-container, .ot-pc-content, .ot-sdk-container').first();
-          if (dialog.length) {
-            dialog.attr('role', 'dialog');
-            dialog.attr('tabindex', '0');
-            dialog.attr('aria-label', 'Cookie Preference Center');
-          }
-
-          clearInterval(interval);
-        }
-      }, 250);
-
-      // DPM-15100: Carousel live region
-      $('.slick--field-carousel-slides', context).attr('aria-live', 'polite');
-
-    }
-  };
-
-})(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// DPM-18987: OneTrust Cookie Modal - Add tabindex + aria-label
-const otSelectors = [
-  '.ot-cat-item',
-  '.ot-tab-desc',
-  '.ot-tab-list',
-  '.ot-abt-tab'
-];
-
-$(otSelectors.join(','), context).each(function () {
-
-  // Avoid modifying natural controls like <a> and <button>
-  if (!$(this).is('a, button')) {
-
-    $(this).attr('tabindex', '0');
-    $(this).attr('aria-label', 'Cookie Preference Center');
-
-  }
-});
-
-// Fallback interval for late-loaded OneTrust content
-const interval = setInterval(() => {
-  const $targets = $(otSelectors.join(','));
-  if ($targets.length > 0) {
-
-    $targets.each(function () {
-      if (!$(this).is('a, button')) {
-        $(this).attr('tabindex', '0');
-        $(this).attr('aria-label', 'Cookie Preference Center');
-      }
-    });
-
-    clearInterval(interval);
-  }
-}, 250);
+Just say the word 🚀
