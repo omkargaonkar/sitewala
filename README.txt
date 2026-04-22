@@ -1,3 +1,48 @@
+
+
+
+
+
+
+
+
+
+
+(function () {
+  const wrapper = document.querySelector('#edit-field-ar--2--wrapper');
+  if (!wrapper) return;
+
+  const errorMsg = wrapper.querySelector('.form-item--error-message');
+  if (!errorMsg) return;
+
+  // ensure ID exists
+  if (!errorMsg.id) {
+    errorMsg.id = 'edit-field-ar-error';
+  }
+
+  const inputs = wrapper.querySelectorAll('input[type="checkbox"]');
+
+  inputs.forEach(input => {
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', errorMsg.id);
+  });
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Perfect 👍
 Below is a detailed 2–3 page resume (long-form, professional, ATS-friendly) built entirely new and focused strictly on SQL, PostgreSQL, OOP concepts, JavaScript, PHP, and UNIX experience.
 You can later trim or format it in Word/PDF as needed.
