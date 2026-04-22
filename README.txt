@@ -1,5 +1,61 @@
 
+Yes—you can change the error message using Drupal Asset Injector (JS). You just need to target the rendered error element and update its text.
 
+Simple JS solution
+
+(function () {
+  const wrapper = document.querySelector('#edit-field-ar--2--wrapper');
+  if (!wrapper) return;
+  const errorMsg = wrapper.querySelector('.form-item--error-message');
+  if (!errorMsg) return;
+  errorMsg.textContent = 'Please select Yes or No before submitting.';
+})();
+
+⸻
+
+If error loads after submit (dynamic)
+
+Use a small observer so it updates when Drupal injects the error:
+
+(function () {
+  const wrapper = document.querySelector('#edit-field-ar--2--wrapper');
+  if (!wrapper) return;
+  const observer = new MutationObserver(() => {
+    const errorMsg = wrapper.querySelector('.form-item--error-message');
+    if (errorMsg) {
+      errorMsg.textContent = 'Please select Yes or No before submitting.';
+    }
+  });
+  observer.observe(wrapper, { childList: true, subtree: true });
+})();
+
+⸻
+
+More robust (Drupal-friendly with once)
+
+(function (Drupal, once) {
+  Drupal.behaviors.customErrorMessage = {
+    attach: function (context) {
+      once('custom-error', context.querySelectorAll('#edit-field-ar--2--wrapper'))
+        .forEach(wrapper => {
+          const errorMsg = wrapper.querySelector('.form-item--error-message');
+          if (errorMsg) {
+            errorMsg.textContent = 'Please select Yes or No before submitting.';
+          }
+        });
+    }
+  };
+})(Drupal, once);
+
+⸻
+
+Notes
+
+* This only changes frontend text, not backend validation.
+* If you want a permanent fix, update it in form validation (PHP) instead.
+* Combine this with aria-describedby fix for accessibility compliance.
+
+If you want, ￼ I can give the PHP-side proper Drupal validation hook too.
 
 
 
