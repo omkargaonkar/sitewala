@@ -1,3 +1,125 @@
+No problem—you’ve already shared enough. Your slider element clearly contains:
+
+class="slick blazy slick-field slick--field-carousel-slides ... ee-slides-dots-autoplay ..."
+
+So instead of guessing, we’ll target a reliable class that exists in your markup.
+
+👉 Best selector from your code:
+
+.slick--field-carousel-slides
+
+⸻
+
+✅ Final Drupal JS Injector Code (Adjusted for your case)
+
+Paste this directly:
+
+(function ($, Drupal) {
+  Drupal.behaviors.slickPauseButton = {
+    attach: function (context, settings) {
+      $('.slick--field-carousel-slides', context).once('slickPauseInit').each(function () {
+        var $slider = $(this);
+        // Ensure slick is initialized
+        if ($slider.hasClass('slick-initialized')) {
+          addPauseButton($slider);
+        } else {
+          $slider.on('init', function () {
+            addPauseButton($slider);
+          });
+        }
+        function addPauseButton($slider) {
+          var $dots = $slider.find('.slick-dots');
+          if ($dots.length && $dots.next('.slick-pause-btn').length === 0) {
+            var $btn = $('<button>', {
+              class: 'slick-pause-btn',
+              text: 'Pause',
+              'aria-label': 'Pause slideshow',
+              'aria-pressed': 'false',
+              type: 'button'
+            });
+            $dots.after($btn);
+            var isPaused = false;
+            $btn.on('click', function () {
+              if (!isPaused) {
+                $slider.slick('slickPause');
+                $btn.text('Play')
+                    .attr('aria-label', 'Play slideshow')
+                    .attr('aria-pressed', 'true');
+              } else {
+                $slider.slick('slickPlay');
+                $btn.text('Pause')
+                    .attr('aria-label', 'Pause slideshow')
+                    .attr('aria-pressed', 'false');
+              }
+              isPaused = !isPaused;
+            });
+          }
+        }
+      });
+    }
+  };
+})(jQuery, Drupal);
+
+⸻
+
+🎨 Optional CSS (JS Injector → CSS section)
+
+.slick-pause-btn {
+  margin-left: 12px;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+⸻
+
+🔍 Why this works (important)
+
+* Uses .slick--field-carousel-slides → stable Drupal Slick class
+* Handles both cases:
+    * Already initialized slider ✅
+    * Late initialization (common in Drupal) ✅
+* Prevents duplicate buttons using .once()
+* Places button right after dots (as required)
+
+⸻
+
+✅ Expected Output
+
+You’ll see:
+
+[ •  • ]   Pause
+
+Click → changes to:
+
+[ •  • ]   Play
+
+⸻
+
+⚠️ If it still doesn’t show
+
+Tell me:
+
+* Is this inside a View / Paragraph / Block?
+* Share full screenshot or HTML
+
+I’ll give you exact selector (100% accurate) for your Drupal setup.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Yes—you can change the error message using Drupal Asset Injector (JS). You just need to target the rendered error element and update its text.
 
