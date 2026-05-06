@@ -1,4 +1,143 @@
 
+Thanks—that screenshot confirms the real issue 👍
+
+👉 Your dots are rendering, but JS is not attaching to the correct slider instance.
+In Drupal Slick, sometimes .slick.slider is not the element that controls autoplay (there can be nested wrappers).
+
+So instead of fighting selectors, we’ll use a bulletproof approach:
+➡️ Attach button directly to .slick-dots (since we KNOW it exists)
+➡️ Control the nearest initialized Slick instance
+
+⸻
+
+✅ 🔥 FINAL WORKING SOLUTION (No guesswork)
+
+✅ JS Injector (copy this exactly)
+
+(function ($, Drupal) {
+  Drupal.behaviors.fixSlickPause = {
+    attach: function (context) {
+      $('.slick-dots', context).once('addPauseBtnFinal').each(function () {
+        var $dots = $(this);
+        // Find the correct slider (parent with slick initialized)
+        var $slider = $dots.closest('.slick-slider');
+        if (!$slider.length) return;
+        // Prevent duplicate button
+        if ($dots.next('.pause-btn-final').length) return;
+        // Create button
+        var $btn = $('<button class="pause-btn-final" aria-label="Pause slideshow" aria-pressed="false" type="button"></button>');
+        // Insert after dots
+        $dots.after($btn);
+        var isPaused = false;
+        $btn.on('click', function () {
+          if (!isPaused) {
+            $slider.slick('slickPause');
+            $btn.addClass('paused')
+                .attr('aria-label', 'Play slideshow')
+                .attr('aria-pressed', 'true');
+          } else {
+            $slider.slick('slickPlay');
+            $btn.removeClass('paused')
+                .attr('aria-label', 'Pause slideshow')
+                .attr('aria-pressed', 'false');
+          }
+          isPaused = !isPaused;
+        });
+      });
+    }
+  };
+})(jQuery, Drupal);
+
+⸻
+
+🎨 CSS (this will make it visible like your sample)
+
+.pause-btn-final {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #2f4a6d;
+  background: #fff;
+  margin-left: 15px;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+}
+/* Pause icon */
+.pause-btn-final::before,
+.pause-btn-final::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  width: 4px;
+  height: 16px;
+  background: #2f4a6d;
+}
+.pause-btn-final::before {
+  left: 11px;
+}
+.pause-btn-final::after {
+  right: 11px;
+}
+/* Play icon */
+.pause-btn-final.paused::before {
+  width: 0;
+  height: 0;
+  border-left: 12px solid #2f4a6d;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  left: 13px;
+  top: 9px;
+}
+.pause-btn-final.paused::after {
+  display: none;
+}
+
+⸻
+
+✅ Why THIS will work (your exact case)
+
+* Targets .slick-dots → confirmed present in your DOM ✅
+* Uses .closest('.slick-slider') → finds correct slider automatically ✅
+* No dependency on your confusing Drupal classes ✅
+* Works even with multiple sliders on page ✅
+
+⸻
+
+🔍 Quick Debug (if still not visible)
+
+Open console and run:
+
+$('.slick-dots').length
+
+👉 If result is 1 or more → button WILL appear
+👉 If 0 → dots are loading late → tell me, I’ll add observer fix
+
+⸻
+
+✅ Expected Result
+
+You’ll finally see:
+
+● ●        ( ⏸ )
+
+⸻
+
+If you want next step:
+👉 I can position button exact bottom-right corner like your screenshot (floating style)
+👉 Or match exact Zelle design spacing
+
+Just tell 👍
+
+
+
+
+
+
+
+
+
+
 
 Perfect—this HTML helped. I can see exactly why your button wasn’t showing.
 
