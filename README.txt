@@ -1,4 +1,157 @@
 
+Got it—this screenshot helps a lot 👍
+You don’t just want a text button, you want a round pause icon button (like ⏸ inside a circle) aligned to the right of the dots.
+
+Let’s build exactly that.
+
+⸻
+
+✅ What we’ll do
+
+* Add a circular Pause/Play button
+* Position it to the right side of dots
+* Match UI like your sample
+* Keep it accessible + working with Slick
+
+⸻
+
+✅ Final Drupal JS Injector Code
+
+(function ($, Drupal) {
+  Drupal.behaviors.slickPauseStyled = {
+    attach: function (context) {
+      $('.slick', context).once('slickPauseStyled').each(function () {
+        var $slider = $(this);
+        function addButton() {
+          var $dots = $slider.find('.slick-dots');
+          if (!$dots.length) {
+            $dots = $('.slick-dots');
+          }
+          if ($dots.length && $('.custom-slick-pause').length === 0) {
+            var $btn = $(`
+              <button class="custom-slick-pause" aria-label="Pause slideshow" aria-pressed="false">
+                <span class="pause-icon"></span>
+              </button>
+            `);
+            // Wrap dots + button in flex container
+            if (!$dots.parent().hasClass('dots-wrapper')) {
+              $dots.wrap('<div class="dots-wrapper"></div>');
+            }
+            $dots.after($btn);
+            var isPaused = false;
+            $btn.on('click', function () {
+              if (!isPaused) {
+                $slider.slick('slickPause');
+                $btn.attr('aria-label', 'Play slideshow')
+                    .attr('aria-pressed', 'true')
+                    .addClass('is-paused');
+              } else {
+                $slider.slick('slickPlay');
+                $btn.attr('aria-label', 'Pause slideshow')
+                    .attr('aria-pressed', 'false')
+                    .removeClass('is-paused');
+              }
+              isPaused = !isPaused;
+            });
+          }
+        }
+        if ($slider.hasClass('slick-initialized')) {
+          addButton();
+        }
+        $slider.on('init', addButton);
+        setTimeout(addButton, 1200); // fallback
+      });
+    }
+  };
+})(jQuery, Drupal);
+
+⸻
+
+🎨 CSS (IMPORTANT for round button like your image)
+
+Paste this in CSS Injector:
+
+.dots-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.slick-dots {
+  margin: 0;
+}
+.custom-slick-pause {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #1f3b5b;
+  background: transparent;
+  position: relative;
+  cursor: pointer;
+}
+/* Pause icon (||) */
+.custom-slick-pause .pause-icon::before,
+.custom-slick-pause .pause-icon::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  width: 4px;
+  height: 18px;
+  background: #1f3b5b;
+}
+.custom-slick-pause .pause-icon::before {
+  left: 12px;
+}
+.custom-slick-pause .pause-icon::after {
+  right: 12px;
+}
+/* Play icon (▶) when paused */
+.custom-slick-pause.is-paused .pause-icon::before {
+  width: 0;
+  height: 0;
+  border-left: 14px solid #1f3b5b;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  left: 13px;
+  top: 10px;
+}
+.custom-slick-pause.is-paused .pause-icon::after {
+  display: none;
+}
+
+⸻
+
+✅ Final Result
+
+You’ll get:
+
+● ● ● ●        ( ⏸ )
+
+Click → changes to:
+
+● ● ● ●        ( ▶ )
+
+Exactly like your sample UI.
+
+⸻
+
+🔧 If still not visible
+
+Then 100% issue is dots location mismatch (Drupal sometimes moves them).
+
+Tell me:
+
+* Is this inside Views / Paragraph / Block?
+* Or share Inspect → full HTML
+
+I’ll give you a perfect selector fix (no trial & error).
+
+
+
+
+
+
+
+mm
 If the button isn’t showing, the issue is almost always one of these:
 
 1. wrong selector
