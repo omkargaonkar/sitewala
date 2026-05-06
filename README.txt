@@ -1,3 +1,125 @@
+
+If the button isn’t showing, the issue is almost always one of these:
+
+1. wrong selector
+2. code running before Slick finishes
+3. dots rendered outside your slider wrapper (very common in Drupal Slick)
+
+Let’s fix it in a more robust way.
+
+⸻
+
+✅ Use this stronger JS Injector code
+
+This version:
+
+* Works even if dots are rendered outside
+* Waits properly for Slick
+* Falls back if events don’t fire
+
+(function ($, Drupal) {
+  Drupal.behaviors.slickPauseButton = {
+    attach: function (context) {
+      // Target ANY slick slider (safer)
+      $('.slick', context).once('slickPauseFix').each(function () {
+        var $slider = $(this);
+        function insertButton() {
+          // Find dots globally if not inside slider
+          var $dots = $slider.find('.slick-dots');
+          if (!$dots.length) {
+            $dots = $('.slick-dots'); // fallback (Drupal sometimes moves it)
+          }
+          if ($dots.length && $dots.next('.slick-pause-btn').length === 0) {
+            var $btn = $('<button>', {
+              class: 'slick-pause-btn',
+              text: 'Pause',
+              'aria-label': 'Pause slideshow',
+              'aria-pressed': 'false',
+              type: 'button'
+            });
+            $dots.after($btn);
+            var isPaused = false;
+            $btn.on('click', function () {
+              if (!isPaused) {
+                $slider.slick('slickPause');
+                $btn.text('Play')
+                    .attr('aria-label', 'Play slideshow')
+                    .attr('aria-pressed', 'true');
+              } else {
+                $slider.slick('slickPlay');
+                $btn.text('Pause')
+                    .attr('aria-label', 'Pause slideshow')
+                    .attr('aria-pressed', 'false');
+              }
+              isPaused = !isPaused;
+            });
+          }
+        }
+        // Case 1: already initialized
+        if ($slider.hasClass('slick-initialized')) {
+          insertButton();
+        }
+        // Case 2: wait for init
+        $slider.on('init', function () {
+          insertButton();
+        });
+        // Fallback: force after delay (important for Drupal)
+        setTimeout(insertButton, 1500);
+      });
+    }
+  };
+})(jQuery, Drupal);
+
+⸻
+
+🎨 Add CSS (important for visibility)
+
+Sometimes button is added but hidden.
+
+.slick-pause-btn {
+  margin-left: 10px;
+  padding: 6px 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  z-index: 9999;
+}
+
+⸻
+
+🔍 Debug (very important)
+
+Open browser console (F12) and run:
+
+$('.slick-dots').length
+
+👉 If result is 0 → dots not found → we need different selector
+👉 If result > 0 → button should appear
+
+⸻
+
+🚨 Most common Drupal issue
+
+Sometimes dots are inside another wrapper like:
+
+.slick-slider
+.slick-dotted
+.slick--optionset
+
+If still not working, send me:
+👉 full HTML of slider (right click → inspect → copy outer HTML)
+
+I’ll give you exact working selector + injector code (no guesswork).
+
+
+
+
+
+
+
+
 No problem—you’ve already shared enough. Your slider element clearly contains:
 
 class="slick blazy slick-field slick--field-carousel-slides ... ee-slides-dots-autoplay ..."
