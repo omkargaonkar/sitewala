@@ -1,3 +1,86 @@
+
+(function (Drupal, once) {
+  Drupal.behaviors.oneTrustInertFix = {
+    attach: function (context) {
+
+      once('ot-inert-fix', '.paze-cookie-preferences', context)
+      .forEach(function(trigger){
+
+        let previousFocus = null;
+
+        trigger.addEventListener('click', function(){
+
+          previousFocus = document.activeElement;
+
+          const timer = setInterval(function(){
+
+            const modal = document.querySelector('#onetrust-pc-sdk');
+
+            if (
+              modal &&
+              !modal.classList.contains('ot-hide')
+            ) {
+
+              clearInterval(timer);
+
+              // Make everything except OneTrust inert
+              [...document.body.children].forEach(function(el){
+
+                if (el.id !== 'onetrust-pc-sdk') {
+                  el.setAttribute('inert', '');
+                  el.setAttribute('aria-hidden', 'true');
+                }
+
+              });
+
+              // Focus inside popup
+              const dialog = modal.querySelector('[role="dialog"]');
+
+              setTimeout(function(){
+                if(dialog){
+                  dialog.focus();
+                }
+              },200);
+
+              // Watch close
+              const closeTimer = setInterval(function(){
+
+                if(modal.classList.contains('ot-hide')){
+
+                  clearInterval(closeTimer);
+
+                  // Restore page
+                  [...document.body.children].forEach(function(el){
+
+                    if(el.id !== 'onetrust-pc-sdk'){
+                      el.removeAttribute('inert');
+                      el.removeAttribute('aria-hidden');
+                    }
+
+                  });
+
+                  // Restore original focus
+                  if(previousFocus){
+                    previousFocus.focus();
+                  }
+
+                }
+
+              },100);
+
+            }
+
+          },100);
+
+        });
+
+      });
+    }
+  };
+})(Drupal, once);
+
+
+
 (function (Drupal, once) {
   Drupal.behaviors.oneTrustFocusFix = {
     attach: function (context) {
