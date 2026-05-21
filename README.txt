@@ -1,5 +1,119 @@
 
 (function (Drupal, once) {
+  Drupal.behaviors.oneTrustFocusFix = {
+    attach: function (context) {
+
+      once('ot-focus-fix', '.paze-cookie-preferences', context)
+        .forEach(function (trigger) {
+
+          let footerLink = trigger;
+
+          trigger.addEventListener('click', function () {
+
+            const observer = new MutationObserver(function () {
+
+              const modal = document.querySelector('#onetrust-pc-sdk');
+
+              if (modal && !modal.classList.contains('ot-hide')) {
+
+                observer.disconnect();
+
+                // Focus first element after modal opens
+                setTimeout(function () {
+                  const firstFocusable = modal.querySelector(
+                    '#close-pc-btn-handler, button, input, [tabindex="0"]'
+                  );
+
+                  if (firstFocusable) {
+                    firstFocusable.focus();
+                  }
+                }, 300);
+
+              }
+            });
+
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true,
+              attributes: true
+            });
+
+          });
+
+          // Global capture listener
+          document.addEventListener('keydown', function (e) {
+
+            const modal = document.querySelector('#onetrust-pc-sdk');
+
+            if (
+              !modal ||
+              modal.classList.contains('ot-hide')
+            ) {
+              return;
+            }
+
+            if (e.key !== 'Tab') return;
+
+            const focusables = [...modal.querySelectorAll(
+              'button, a, input, select, textarea, [tabindex="0"]'
+            )].filter(el =>
+              el.offsetParent !== null
+            );
+
+            if (!focusables.length) return;
+
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+
+            // Shift+Tab from first item
+            if (
+              e.shiftKey &&
+              document.activeElement === first
+            ) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+
+              footerLink.focus();
+
+              return false;
+            }
+
+            // Tab from footer link back into popup
+            if (
+              !e.shiftKey &&
+              document.activeElement === footerLink
+            ) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+
+              first.focus();
+
+              return false;
+            }
+
+            // Prevent escaping forward
+            if (
+              !e.shiftKey &&
+              document.activeElement === last
+            ) {
+              e.preventDefault();
+              first.focus();
+
+              return false;
+            }
+
+          }, true); // IMPORTANT: capture=true
+
+        });
+    }
+  };
+})(Drupal, once);
+
+
+
+
+))))))))))))))))))))))))))))))))))))))))
+(function (Drupal, once) {
   Drupal.behaviors.oneTrustFocusTrap = {
     attach: function (context) {
 
