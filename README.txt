@@ -1,4 +1,75 @@
+(function (Drupal, once) {
+  Drupal.behaviors.oneTrustFocusManagement = {
+    attach: function (context) {
 
+      once('ot-focus', '.paze-cookie-preferences', context)
+        .forEach(function (trigger) {
+
+          let previousFocus = null;
+
+          trigger.addEventListener('click', function () {
+
+            previousFocus = document.activeElement;
+
+            const observer = new MutationObserver(function () {
+
+              const modal = document.querySelector('#onetrust-pc-sdk');
+
+              if (
+                modal &&
+                !modal.classList.contains('ot-hide')
+              ) {
+                observer.disconnect();
+
+                // Focus first meaningful control in popup
+                const firstFocusable =
+                  modal.querySelector(
+                    '#close-pc-btn-handler,' +
+                    '.category-menu-switch-handler,' +
+                    'button,' +
+                    'input,' +
+                    '[tabindex="0"]'
+                  );
+
+                if (firstFocusable) {
+                  setTimeout(function () {
+                    firstFocusable.focus();
+                  }, 100);
+                }
+
+                // Watch modal closing
+                const closeObserver = new MutationObserver(function () {
+
+                  if (modal.classList.contains('ot-hide')) {
+                    closeObserver.disconnect();
+
+                    // Return focus to original footer link
+                    if (previousFocus) {
+                      previousFocus.focus();
+                    }
+                  }
+                });
+
+                closeObserver.observe(modal, {
+                  attributes: true,
+                  attributeFilter: ['class']
+                });
+              }
+            });
+
+            observer.observe(document.body, {
+              childList: true,
+              subtree: true
+            });
+
+          });
+        });
+    }
+  };
+})(Drupal, once);
+
+
+**********************************************************************
 
 
 (function (Drupal, once) {
