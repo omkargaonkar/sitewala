@@ -1,3 +1,110 @@
+
+(function (Drupal, once) {
+
+  Drupal.behaviors.oneTrustModalFocus = {
+    attach: function (context) {
+
+      once('ot-modal-focus', '.paze-cookie-preferences', context)
+      .forEach(function(trigger){
+
+        let previousFocus = null;
+        let disabledItems = [];
+
+        trigger.addEventListener('click', function(){
+
+          previousFocus = document.activeElement;
+
+          const interval = setInterval(function(){
+
+            const modal = document.querySelector('#onetrust-pc-sdk');
+
+            if (
+              modal &&
+              !modal.classList.contains('ot-hide')
+            ) {
+
+              clearInterval(interval);
+
+              // Focus Cookie dialog
+              const dialog = modal.querySelector('[role="dialog"]');
+
+              if(dialog){
+                setTimeout(function(){
+                  dialog.focus();
+                },200);
+              }
+
+              // Disable all focusable elements outside popup
+              disabledItems = [];
+
+              const focusables = document.querySelectorAll(
+                'a,button,input,select,textarea,[tabindex]'
+              );
+
+              focusables.forEach(function(el){
+
+                if(!modal.contains(el)){
+
+                  disabledItems.push({
+                    element: el,
+                    tabindex: el.getAttribute('tabindex')
+                  });
+
+                  el.setAttribute('tabindex','-1');
+
+                }
+
+              });
+
+              // Watch for close
+              const closeInterval = setInterval(function(){
+
+                if(modal.classList.contains('ot-hide')){
+
+                  clearInterval(closeInterval);
+
+                  // Restore tabindex values
+                  disabledItems.forEach(function(item){
+
+                    if(item.tabindex === null){
+                      item.element.removeAttribute('tabindex');
+                    } else {
+                      item.element.setAttribute(
+                        'tabindex',
+                        item.tabindex
+                      );
+                    }
+
+                  });
+
+                  disabledItems=[];
+
+                  // Return focus
+                  if(previousFocus){
+                    previousFocus.focus();
+                  }
+
+                }
+
+              },100);
+
+            }
+
+          },100);
+
+        });
+
+      });
+
+    }
+  };
+
+})(Drupal, once);
+
+
+LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+
+
 (function (Drupal, once) {
   Drupal.behaviors.oneTrustFocusRestore = {
     attach: function (context) {
