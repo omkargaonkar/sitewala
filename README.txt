@@ -1,3 +1,103 @@
+(function (Drupal, once) {
+  Drupal.behaviors.oneTrustAccessibilityFix = {
+    attach: function (context) {
+
+      once('ot-accessibility-fix', '.paze-cookie-preferences', context)
+      .forEach(function (trigger) {
+
+        let footerLink = trigger;
+
+        trigger.addEventListener('click', function () {
+
+          const interval = setInterval(function () {
+
+            const modal = document.querySelector('#onetrust-pc-sdk');
+            const dialog = modal ? modal.querySelector('[role="dialog"]') : null;
+
+            if (
+              modal &&
+              dialog &&
+              !modal.classList.contains('ot-hide')
+            ) {
+              clearInterval(interval);
+
+              // Move focus into Cookie Preference Center
+              setTimeout(function () {
+                dialog.focus();
+              }, 200);
+
+            }
+
+          }, 100);
+
+        });
+
+      });
+
+      // Focus handling while modal is open
+      document.addEventListener('keydown', function (e) {
+
+        const modal = document.querySelector('#onetrust-pc-sdk');
+
+        if (
+          !modal ||
+          modal.classList.contains('ot-hide')
+        ) {
+          return;
+        }
+
+        const dialog = modal.querySelector('[role="dialog"]');
+
+        if (!dialog || e.key !== 'Tab') {
+          return;
+        }
+
+        const focusable = [
+          ...modal.querySelectorAll(
+            'button, a, input, select, textarea, [tabindex="0"]'
+          )
+        ].filter(el =>
+          el.offsetParent !== null &&
+          !el.disabled
+        );
+
+        if (!focusable.length) return;
+
+        const first = focusable[0];
+
+        // Shift+Tab from first element
+        if (
+          e.shiftKey &&
+          document.activeElement === first
+        ) {
+          e.preventDefault();
+
+          document
+            .querySelector('.paze-cookie-preferences')
+            .focus();
+        }
+
+        // Tab from footer link
+        if (
+          !e.shiftKey &&
+          document.activeElement.classList.contains(
+            'paze-cookie-preferences'
+          )
+        ) {
+          e.preventDefault();
+
+          dialog.focus();
+        }
+
+      }, true);
+
+    }
+  };
+})(Drupal, once);
+
+
+oooooooooooooooooooooooooooooooooooooooo
+
 
 (function (Drupal, once) {
   Drupal.behaviors.oneTrustFocusFix = {
