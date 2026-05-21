@@ -1,6 +1,85 @@
 
 
 
+(function (Drupal, once) {
+  Drupal.behaviors.cookiePreferenceFocus = {
+    attach: function (context) {
+
+      once(
+        'cookie-focus',
+        '.paze-cookie-preferences',
+        context
+      ).forEach(function (trigger) {
+
+        let previousFocus = null;
+
+        trigger.addEventListener('click', function () {
+
+          // Store current focused element
+          previousFocus = document.activeElement;
+
+          // Wait for Cookie Preference Center to render
+          const observer = new MutationObserver(function () {
+
+            // Replace selector with actual cookie modal selector
+            const cookieModal = document.querySelector(
+              '#onetrust-pc-sdk, .cookie-preference-center'
+            );
+
+            if (cookieModal) {
+              observer.disconnect();
+
+              // Make modal programmatically focusable
+              cookieModal.setAttribute('tabindex', '-1');
+
+              // Focus first interactive item
+              const firstFocusable = cookieModal.querySelector(
+                'button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+              );
+
+              if (firstFocusable) {
+                firstFocusable.focus();
+              } else {
+                cookieModal.focus();
+              }
+
+              // Watch for close event
+              const closeObserver = new MutationObserver(function () {
+                const isHidden =
+                  cookieModal.offsetParent === null ||
+                  cookieModal.getAttribute('aria-hidden') === 'true';
+
+                if (isHidden) {
+                  closeObserver.disconnect();
+
+                  // Restore focus back to trigger
+                  if (previousFocus) {
+                    previousFocus.focus();
+                  }
+                }
+              });
+
+              closeObserver.observe(cookieModal, {
+                attributes: true,
+                attributeFilter: ['style', 'class', 'aria-hidden']
+              });
+            }
+          });
+
+          observer.observe(document.body, {
+            childList: true,
+            subtree: true
+          });
+
+        });
+
+      });
+    }
+  };
+})(Drupal, once);
+
+
+
 
 
 Perfect 👍
