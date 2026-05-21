@@ -1,3 +1,64 @@
+(function (Drupal, once) {
+  Drupal.behaviors.oneTrustFocusRestore = {
+    attach: function (context) {
+
+      once('ot-focus-restore', '.paze-cookie-preferences', context)
+      .forEach(function(trigger){
+
+        let previousFocus = null;
+
+        trigger.addEventListener('click', function(){
+
+          previousFocus = document.activeElement;
+
+          const openWatcher = setInterval(function(){
+
+            const modal = document.querySelector('#onetrust-pc-sdk');
+            const dialog = modal?.querySelector('[role="dialog"]');
+
+            if (
+              modal &&
+              dialog &&
+              !modal.classList.contains('ot-hide')
+            ) {
+
+              clearInterval(openWatcher);
+
+              // Focus Cookie Preference Center
+              setTimeout(function(){
+                dialog.focus();
+              },200);
+
+              // Watch for modal close
+              const closeWatcher = setInterval(function(){
+
+                if(modal.classList.contains('ot-hide')){
+
+                  clearInterval(closeWatcher);
+
+                  // Return focus to footer link
+                  if(previousFocus){
+                    previousFocus.focus();
+                  }
+
+                }
+
+              },100);
+
+            }
+
+          },100);
+
+        });
+
+      });
+
+    }
+  };
+})(Drupal, once);
+_______________________________________________
+
+
 
 (function (Drupal, once) {
   Drupal.behaviors.oneTrustInertFix = {
