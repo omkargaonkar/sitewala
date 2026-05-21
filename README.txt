@@ -1,3 +1,118 @@
+
+(function (Drupal, once) {
+  Drupal.behaviors.oneTrustFocusTrap = {
+    attach: function (context) {
+
+      once('ot-focus-trap', '.paze-cookie-preferences', context)
+        .forEach(function (trigger) {
+
+          let previousFocus = null;
+
+          trigger.addEventListener('click', function () {
+
+            previousFocus = document.activeElement;
+
+            const observer = new MutationObserver(function () {
+
+              const modal = document.querySelector('#onetrust-pc-sdk');
+
+              if (modal && !modal.classList.contains('ot-hide')) {
+
+                observer.disconnect();
+
+                // Get all visible focusable items in popup
+                function getFocusable() {
+                  return [...modal.querySelectorAll(
+                    'button, a, input, select, textarea, [tabindex="0"]'
+                  )].filter(el =>
+                    el.offsetWidth > 0 &&
+                    el.offsetHeight > 0 &&
+                    !el.disabled
+                  );
+                }
+
+                let focusable = getFocusable();
+
+                let first = focusable[0];
+                let last = focusable[focusable.length - 1];
+
+                // Initial focus
+                setTimeout(() => {
+                  first.focus();
+                }, 100);
+
+                // Trap keyboard navigation
+                modal.addEventListener('keydown', function (e) {
+
+                  if (e.key !== 'Tab') return;
+
+                  focusable = getFocusable();
+                  first = focusable[0];
+                  last = focusable[focusable.length - 1];
+
+                  // Shift+Tab on first item
+                  if (
+                    e.shiftKey &&
+                    document.activeElement === first
+                  ) {
+                    e.preventDefault();
+
+                    // move outside popup to footer link
+                    previousFocus.focus();
+                  }
+
+                  // Tab on last item
+                  else if (
+                    !e.shiftKey &&
+                    document.activeElement === last
+                  ) {
+                    e.preventDefault();
+
+                    // cycle back inside popup
+                    first.focus();
+                  }
+
+                });
+
+                // Restore focus after close
+                const closeObserver = new MutationObserver(function () {
+
+                  if (modal.classList.contains('ot-hide')) {
+
+                    closeObserver.disconnect();
+
+                    if (previousFocus) {
+                      previousFocus.focus();
+                    }
+
+                  }
+
+                });
+
+                closeObserver.observe(modal,{
+                  attributes:true,
+                  attributeFilter:['class']
+                });
+
+              }
+
+            });
+
+            observer.observe(document.body,{
+              childList:true,
+              subtree:true
+            });
+
+          });
+
+        });
+
+    }
+  };
+})(Drupal, once);
+
+**************************************************|||||||||||||
+
 (function (Drupal, once) {
   Drupal.behaviors.oneTrustFocusManagement = {
     attach: function (context) {
