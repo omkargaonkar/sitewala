@@ -1,3 +1,302 @@
+(() => {
+
+  document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+
+    const trigger = dropdown.querySelector('.dropdown-selected');
+
+    if (!trigger) return;
+
+    trigger.setAttribute('tabindex', '0');
+    trigger.setAttribute('role', 'button');
+
+    trigger.addEventListener('keydown', e => {
+
+      if (
+        e.key === 'Enter' ||
+        e.key === ' ' ||
+        e.key === 'ArrowDown'
+      ) {
+        e.preventDefault();
+
+        trigger.click();
+
+        setTimeout(() => {
+
+          const options = [
+            ...dropdown.querySelectorAll('.dropdown-option')
+          ];
+
+          options.forEach(opt => {
+            opt.setAttribute('tabindex', '-1');
+          });
+
+          if (options.length) {
+            options[0].setAttribute('tabindex', '0');
+            options[0].focus();
+          }
+
+        }, 200);
+      }
+    });
+
+    dropdown.addEventListener('keydown', e => {
+
+      const active = document.activeElement;
+
+      if (!active.classList.contains('dropdown-option')) return;
+
+      const options = [
+        ...dropdown.querySelectorAll('.dropdown-option')
+      ];
+
+      const currentIndex = options.indexOf(active);
+
+      switch (e.key) {
+
+        case 'ArrowDown':
+          e.preventDefault();
+
+          if (currentIndex < options.length - 1) {
+
+            options[currentIndex].setAttribute('tabindex', '-1');
+
+            options[currentIndex + 1].setAttribute('tabindex', '0');
+
+            options[currentIndex + 1].focus();
+          }
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+
+          if (currentIndex > 0) {
+
+            options[currentIndex].setAttribute('tabindex', '-1');
+
+            options[currentIndex - 1].setAttribute('tabindex', '0');
+
+            options[currentIndex - 1].focus();
+          }
+          break;
+
+        case 'Home':
+          e.preventDefault();
+
+          options[currentIndex].setAttribute('tabindex', '-1');
+          options[0].setAttribute('tabindex', '0');
+          options[0].focus();
+
+          break;
+
+        case 'End':
+          e.preventDefault();
+
+          options[currentIndex].setAttribute('tabindex', '-1');
+          options[options.length - 1].setAttribute('tabindex', '0');
+          options[options.length - 1].focus();
+
+          break;
+
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+
+          active.click();
+
+          setTimeout(() => {
+            trigger.focus();
+          }, 100);
+
+          break;
+
+        case 'Escape':
+          e.preventDefault();
+
+          trigger.focus();
+          document.body.click();
+
+          break;
+      }
+    });
+  });
+
+})();
+
+(function () {
+
+  const accordionItems = document.querySelectorAll('.accordion-item');
+
+  if (!accordionItems.length) return;
+
+  accordionItems.forEach((item, index) => {
+
+    const header = item.querySelector('.accordion-header');
+    const content = item.querySelector('.accordion-content');
+
+    if (!header || !content) return;
+
+    const baseId = item.id || `accordion-item-${index}`;
+    const headerId = `accordion-header-${baseId}`;
+    const contentId = `accordion-panel-${baseId}`;
+
+    header.id = headerId;
+    content.id = contentId;
+
+    header.setAttribute('role', 'button');
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('aria-controls', contentId);
+
+    content.setAttribute('role', 'region');
+    content.setAttribute('aria-labelledby', headerId);
+
+    const isInitiallyOpen =
+      window.getComputedStyle(content).display !== 'none' &&
+      !content.hasAttribute('hidden');
+
+    header.setAttribute(
+      'aria-expanded',
+      isInitiallyOpen ? 'true' : 'false'
+    );
+
+    const arrowWrapper = header.querySelector('.arrow-icon-wrapper');
+
+    if (arrowWrapper) {
+      arrowWrapper.setAttribute('aria-hidden', 'true');
+    }
+
+    header.addEventListener('keydown', function (event) {
+
+      switch (event.key) {
+
+        case 'Enter':
+        case ' ':
+          event.preventDefault();
+          event.stopPropagation();
+
+          header.dispatchEvent(
+            new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window
+            })
+          );
+
+          break;
+
+        case 'ArrowDown':
+          event.preventDefault();
+
+          if (index < accordionItems.length - 1) {
+            accordionItems[index + 1]
+              .querySelector('.accordion-header')
+              ?.focus();
+          }
+
+          break;
+
+        case 'ArrowUp':
+          event.preventDefault();
+
+          if (index > 0) {
+            accordionItems[index - 1]
+              .querySelector('.accordion-header')
+              ?.focus();
+          }
+
+          break;
+
+        case 'Home':
+          event.preventDefault();
+
+          accordionItems[0]
+            .querySelector('.accordion-header')
+            ?.focus();
+
+          break;
+
+        case 'End':
+          event.preventDefault();
+
+          accordionItems[accordionItems.length - 1]
+            .querySelector('.accordion-header')
+            ?.focus();
+
+          break;
+      }
+    });
+
+    const observer = new MutationObserver(() => {
+
+      const isVisible =
+        window.getComputedStyle(content).display !== 'none';
+
+      header.setAttribute(
+        'aria-expanded',
+        isVisible ? 'true' : 'false'
+      );
+
+      content.setAttribute(
+        'aria-hidden',
+        isVisible ? 'false' : 'true'
+      );
+
+      const focusables = content.querySelectorAll(
+        'a, button, input, select, textarea, [tabindex]'
+      );
+
+      focusables.forEach(el => {
+
+        if (isVisible) {
+
+          if (el.dataset.originalTabindex !== undefined) {
+
+            if (el.dataset.originalTabindex === '') {
+              el.removeAttribute('tabindex');
+            } else {
+              el.setAttribute(
+                'tabindex',
+                el.dataset.originalTabindex
+              );
+            }
+          }
+
+        } else {
+
+          if (el.dataset.originalTabindex === undefined) {
+            el.dataset.originalTabindex =
+              el.getAttribute('tabindex') || '';
+          }
+
+          el.setAttribute('tabindex', '-1');
+        }
+
+      });
+
+    });
+
+    observer.observe(content, {
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+
+  });
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (function (Drupal, once) {
 
