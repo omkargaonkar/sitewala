@@ -1,3 +1,49 @@
+
+
+(() => {
+
+  // Remove filter buttons
+  document.querySelectorAll('[fs-list-element="tag-remove"]').forEach(btn => {
+
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('role', 'button');
+
+    // Optional accessible name
+    const filterItem = btn.closest('[fs-list-element="tag"]');
+    const value = filterItem?.querySelector('[fs-list-element="tag-value"]')?.textContent?.trim();
+
+    if (value) {
+      btn.setAttribute('aria-label', `Remove filter ${value}`);
+    }
+
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+
+  });
+
+  // Clear all filters button
+  document.querySelectorAll('[fs-list-element="clear"]').forEach(btn => {
+
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('role', 'button');
+
+    btn.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+  });
+})();
+
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
 (() => {
 
   document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
@@ -283,7 +329,7 @@
 
 })();
 
-
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
 
