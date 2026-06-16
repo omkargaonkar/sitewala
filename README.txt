@@ -1,5 +1,97 @@
 (() => {
 
+  function initFilterActions() {
+
+    // Remove filter buttons
+    document
+      .querySelectorAll('[fs-list-element="tag-remove"]')
+      .forEach(btn => {
+
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('role', 'button');
+
+        const filterItem = btn.closest('[fs-list-element="tag"]');
+
+        const field = filterItem
+          ?.querySelector('[fs-list-element="tag-field"]')
+          ?.textContent
+          ?.trim();
+
+        const value = filterItem
+          ?.querySelector('[fs-list-element="tag-value"]')
+          ?.textContent
+          ?.trim();
+
+        if (field && value) {
+          btn.setAttribute(
+            'aria-label',
+            `Remove filter ${field} ${value}`
+          );
+        }
+
+        btn.addEventListener('keydown', e => {
+
+          if (
+            e.key === 'Enter' ||
+            e.key === ' '
+          ) {
+
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      });
+
+    // Clear All Filters button
+    document
+      .querySelectorAll('[fs-list-element="clear"]')
+      .forEach(btn => {
+
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('role', 'button');
+
+        btn.setAttribute(
+          'aria-label',
+          'Clear all filters'
+        );
+
+        btn.addEventListener('keydown', e => {
+
+          if (
+            e.key === 'Enter' ||
+            e.key === ' '
+          ) {
+
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      });
+  }
+
+  initFilterActions();
+
+  // Reapply if Finsweet rebuilds the filter tags
+  const observer = new MutationObserver(() => {
+    initFilterActions();
+  });
+
+  const wrapper = document.querySelector('.applied-filters-wrapper');
+
+  if (wrapper) {
+    observer.observe(wrapper, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+})();
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+(() => {
+
     function initDropdown(dropdown) {
 
         const toggle = dropdown.querySelector('.resource-dropdown-toggle');
