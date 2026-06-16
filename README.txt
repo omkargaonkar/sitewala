@@ -1,3 +1,248 @@
+
+(() => {
+
+  function initDropdown(dropdown) {
+
+    if (dropdown.dataset.keyboardInit === "true") return;
+    dropdown.dataset.keyboardInit = "true";
+
+    const trigger = dropdown.querySelector('.dropdown-selected');
+    const listbox = dropdown.querySelector('.dropdown-options');
+
+    if (!trigger || !listbox) return;
+
+    trigger.setAttribute('tabindex', '0');
+    trigger.setAttribute('role', 'combobox');
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+
+    let currentIndex = 0;
+
+    function getOptions() {
+      return [...listbox.querySelectorAll('.dropdown-option')];
+    }
+
+    function updateOptions() {
+
+      const options = getOptions();
+
+      options.forEach((option, index) => {
+
+        option.setAttribute('role', 'option');
+        option.tabIndex = index === currentIndex ? 0 : -1;
+
+        if (!option.dataset.keyboardBound) {
+
+          option.dataset.keyboardBound = "true";
+
+          option.addEventListener('keydown', e => {
+
+            const opts = getOptions();
+
+            switch (e.key) {
+
+              case 'ArrowDown':
+                e.preventDefault();
+                currentIndex =
+                  currentIndex < opts.length - 1
+                    ? currentIndex + 1
+                    : 0;
+
+                updateOptions();
+                opts[currentIndex].focus();
+                break;
+
+              case 'ArrowUp':
+                e.preventDefault();
+                currentIndex =
+                  currentIndex > 0
+                    ? currentIndex - 1
+                    : opts.length - 1;
+
+                updateOptions();
+                opts[currentIndex].focus();
+                break;
+
+              case 'Home':
+                e.preventDefault();
+                currentIndex = 0;
+                updateOptions();
+                opts[0].focus();
+                break;
+
+              case 'End':
+                e.preventDefault();
+                currentIndex = opts.length - 1;
+                updateOptions();
+                opts[currentIndex].focus();
+                break;
+
+              case 'Enter':
+              case ' ':
+                e.preventDefault();
+                option.click();
+                trigger.focus();
+                break;
+
+              case 'Escape':
+                e.preventDefault();
+
+                listbox.hidden = true;
+
+                trigger.setAttribute(
+                  'aria-expanded',
+                  'false'
+                );
+
+                trigger.focus();
+                break;
+            }
+          });
+
+          option.addEventListener('click', () => {
+
+            currentIndex = getOptions().indexOf(option);
+
+            getOptions().forEach(opt => {
+              opt.setAttribute(
+                'aria-selected',
+                'false'
+              );
+            });
+
+            option.setAttribute(
+              'aria-selected',
+              'true'
+            );
+
+            updateOptions();
+
+            listbox.hidden = true;
+
+            trigger.setAttribute(
+              'aria-expanded',
+              'false'
+            );
+
+            trigger.focus();
+          });
+        }
+      });
+    }
+
+    updateOptions();
+
+    trigger.addEventListener('keydown', e => {
+
+      const expanded =
+        trigger.getAttribute('aria-expanded') === 'true';
+
+      switch (e.key) {
+
+        case 'Enter':
+        case ' ':
+        case 'ArrowDown':
+
+          e.preventDefault();
+
+          if (!expanded) {
+
+            trigger.click();
+
+            setTimeout(() => {
+
+              updateOptions();
+
+              const options = getOptions();
+
+              if (options.length) {
+                options[currentIndex].focus();
+              }
+
+            }, 150);
+          }
+
+          break;
+
+        case 'Escape':
+
+          if (expanded) {
+
+            e.preventDefault();
+
+            listbox.hidden = true;
+
+            trigger.setAttribute(
+              'aria-expanded',
+              'false'
+            );
+          }
+
+          break;
+      }
+    });
+
+    const observer = new MutationObserver(() => {
+      updateOptions();
+    });
+
+    observer.observe(listbox, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  function initAllDropdowns() {
+
+    document
+      .querySelectorAll('.custom-dropdown')
+      .forEach(initDropdown);
+  }
+
+  initAllDropdowns();
+
+  new MutationObserver(() => {
+    initAllDropdowns();
+  }).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  /* --------------------------
+     Accordion Keyboard Support
+  --------------------------- */
+
+  document
+    .querySelectorAll(
+      '[data-value="validate-transfers-and-account-linking-requests"]'
+    )
+    .forEach(item => {
+
+      item.setAttribute('tabindex', '0');
+      item.setAttribute('role', 'button');
+
+      item.addEventListener('keydown', e => {
+
+        if (
+          e.key === 'Enter' ||
+          e.key === ' '
+        ) {
+
+          e.preventDefault();
+
+          item.click();
+        }
+      });
+    });
+
+})();
+
+
+
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
 (() => {
 
   function initFilterActions() {
