@@ -1,3 +1,201 @@
+(() => {
+
+    function initDropdown(dropdown) {
+
+        const toggle = dropdown.querySelector('.resource-dropdown-toggle');
+
+        const options = [
+            ...dropdown.querySelectorAll('.filter-button-option')
+        ];
+
+        if (!toggle || !options.length) return;
+
+        // Remove radios from keyboard navigation
+        dropdown.querySelectorAll('.w-radio-input').forEach(radio => {
+            radio.tabIndex = -1;
+            radio.setAttribute('tabindex', '-1');
+            radio.setAttribute('aria-hidden', 'true');
+        });
+
+        let currentIndex = options.findIndex(option =>
+            option.classList.contains('is-list-active')
+        );
+
+        if (currentIndex < 0) currentIndex = 0;
+
+        function updateRovingTabindex() {
+
+            options.forEach((option, index) => {
+
+                option.tabIndex =
+                    index === currentIndex ? 0 : -1;
+
+                option.setAttribute(
+                    'aria-selected',
+                    index === currentIndex ? 'true' : 'false'
+                );
+            });
+        }
+
+        updateRovingTabindex();
+
+        function focusOption(index) {
+
+            currentIndex = index;
+
+            updateRovingTabindex();
+
+            options[index].focus();
+        }
+
+        function selectOption(index) {
+
+            currentIndex = index;
+
+            const option = options[index];
+
+            const radio =
+                option.querySelector('.w-radio-input');
+
+            options.forEach(opt => {
+                opt.classList.remove('is-list-active');
+            });
+
+            option.classList.add('is-list-active');
+
+            updateRovingTabindex();
+
+            if (radio && !radio.checked) {
+
+                radio.checked = true;
+
+                radio.dispatchEvent(
+                    new Event('change', {
+                        bubbles: true
+                    })
+                );
+            }
+        }
+
+        options.forEach((option, index) => {
+
+            option.setAttribute('role', 'radio');
+
+            option.addEventListener('keydown', e => {
+
+                switch (e.key) {
+
+                    case 'ArrowDown':
+                        e.preventDefault();
+
+                        focusOption(
+                            index === options.length - 1
+                                ? 0
+                                : index + 1
+                        );
+
+                        break;
+
+                    case 'ArrowUp':
+                        e.preventDefault();
+
+                        focusOption(
+                            index === 0
+                                ? options.length - 1
+                                : index - 1
+                        );
+
+                        break;
+
+                    case 'Home':
+                        e.preventDefault();
+                        focusOption(0);
+                        break;
+
+                    case 'End':
+                        e.preventDefault();
+                        focusOption(options.length - 1);
+                        break;
+
+                    case 'Enter':
+                    case ' ':
+                    case 'Spacebar':
+                        e.preventDefault();
+                        selectOption(index);
+                        break;
+                }
+            });
+
+            option.addEventListener('click', () => {
+                selectOption(index);
+            });
+        });
+
+        toggle.addEventListener('keydown', e => {
+
+            if (
+                e.key === 'Enter' ||
+                e.key === ' ' ||
+                e.key === 'ArrowDown'
+            ) {
+
+                e.preventDefault();
+
+                if (
+                    toggle.getAttribute('aria-expanded') === 'false'
+                ) {
+                    toggle.click();
+                }
+
+                setTimeout(() => {
+                    options[currentIndex].focus();
+                }, 150);
+            }
+        });
+
+        function handleDropdownState() {
+
+            const expanded =
+                toggle.getAttribute('aria-expanded') === 'true';
+
+            options.forEach((option, index) => {
+
+                if (!expanded) {
+
+                    option.tabIndex = -1;
+
+                } else {
+
+                    option.tabIndex =
+                        index === currentIndex ? 0 : -1;
+                }
+            });
+
+            // Ensure radios never get focus
+            dropdown.querySelectorAll('.w-radio-input')
+                .forEach(radio => {
+                    radio.tabIndex = -1;
+                    radio.setAttribute('tabindex', '-1');
+                });
+        }
+
+        handleDropdownState();
+
+        new MutationObserver(handleDropdownState)
+            .observe(toggle, {
+                attributes: true,
+                attributeFilter: ['aria-expanded']
+            });
+    }
+
+    document
+        .querySelectorAll('.resource-filter-dropdown')
+        .forEach(initDropdown);
+
+})();
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
 (() => {
