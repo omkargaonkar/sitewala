@@ -3,6 +3,118 @@ DPM -22393
 
 (function (Drupal) {
 
+  Drupal.behaviors.amp29AccessibilityFix = {
+    attach(context) {
+
+      // Process each paragraph content once.
+      context.querySelectorAll('.paragraph-content:not([data-amp29-fixed])')
+        .forEach(section => {
+
+          section.setAttribute('data-amp29-fixed', 'true');
+
+          const heading = section.querySelector(
+            '.paragraph-title, .paragraph-subtitle'
+          );
+
+          const headingText = heading
+            ? heading.textContent.replace(/\s+/g, ' ').trim()
+            : '';
+
+          section.querySelectorAll('.paragraph-cta a').forEach(link => {
+
+            const visibleLabel = link.textContent
+              .replace(/\s+/g, ' ')
+              .trim();
+
+            // =====================================
+            // Shape what's next in financial trust
+            // Learn More
+            // =====================================
+            if (
+              visibleLabel === 'Learn More' &&
+              headingText.includes("Shape what's next in financial trust")
+            ) {
+
+              link.setAttribute(
+                'aria-label',
+                'Learn More about careers at Early Warning'
+              );
+            }
+
+            // =====================================
+            // Meet Paze
+            // Paze.com
+            // =====================================
+            if (visibleLabel === 'Paze.com') {
+
+              link.setAttribute(
+                'aria-label',
+                'Paze.com'
+              );
+            }
+
+            // =====================================
+            // Meet Certos
+            // Learn More
+            // =====================================
+            if (
+              visibleLabel === 'Learn More' &&
+              headingText.toLowerCase().includes('certos')
+            ) {
+
+              link.setAttribute(
+                'aria-label',
+                'Learn More about Certos ℠'
+              );
+            }
+
+          });
+        });
+
+      // =====================================
+      // Fix CertosSM pronunciation
+      // =====================================
+
+      context.querySelectorAll(
+        '.paragraph-title sup, .paragraph-subtitle sup'
+      ).forEach(sup => {
+
+        if (
+          sup.textContent.trim().toUpperCase() === 'SM' &&
+          !sup.hasAttribute('data-certos-fixed')
+        ) {
+
+          sup.setAttribute('data-certos-fixed', 'true');
+
+          // Add space before SM if missing.
+          const previousNode = sup.previousSibling;
+
+          if (
+            previousNode &&
+            previousNode.nodeType === Node.TEXT_NODE &&
+            !previousNode.textContent.endsWith(' ')
+          ) {
+            previousNode.textContent += ' ';
+          }
+
+          // Improve screen reader announcement.
+          sup.setAttribute(
+            'aria-label',
+            'service mark'
+          );
+        }
+
+      });
+
+    }
+  };
+
+})(Drupal);
+
+*****************************************************************************
+
+(function (Drupal) {
+
   Drupal.behaviors.wcagLabelInNameFix = {
     attach(context) {
 
