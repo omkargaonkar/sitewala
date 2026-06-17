@@ -1,4 +1,116 @@
+DPM-20920
 
+(function (Drupal) {
+
+  Drupal.behaviors.ampAccessibilityFix = {
+    attach: function (context) {
+
+      if (context !== document) {
+        return;
+      }
+
+      // Hide cloned slides from AT and keyboard.
+      document.querySelectorAll('.slick-cloned').forEach(function (slide) {
+
+        slide.setAttribute('aria-hidden', 'true');
+
+        slide.querySelectorAll(
+          'a, button, input, select, textarea, iframe, [tabindex]'
+        ).forEach(function (el) {
+          el.setAttribute('tabindex', '-1');
+        });
+      });
+
+      // Email link.
+      const emailLink = document.querySelector(
+        'a[href^="mailto:reportphishing@apwg.org"]'
+      );
+
+      // First visible video in Related Videos carousel.
+      const firstVideo =
+        document.querySelector(
+          '.paragraph--type--video-carousel .slick-slide.slick-current iframe'
+        ) ||
+        document.querySelector(
+          '.paragraph--type--video-carousel .slick-slide.slick-active iframe'
+        ) ||
+        document.querySelector(
+          '.paragraph--type--video-carousel iframe'
+        );
+
+      if (!emailLink || !firstVideo) {
+        return;
+      }
+
+      firstVideo.setAttribute('tabindex', '0');
+
+      // Move focus directly to video.
+      emailLink.addEventListener('keydown', function (e) {
+
+        if (e.key === 'Tab' && !e.shiftKey) {
+          e.preventDefault();
+          firstVideo.focus();
+        }
+
+      });
+
+    }
+  };
+
+})(Drupal);
+
+
+
+
+Normal JS
+
+(function () {
+
+  // Hide cloned/hidden slides from keyboard and screen readers
+  document.querySelectorAll('.slick-cloned').forEach(slide => {
+    slide.setAttribute('aria-hidden', 'true');
+
+    slide.querySelectorAll(
+      'a, button, input, select, textarea, iframe, [tabindex]'
+    ).forEach(el => {
+      el.setAttribute('tabindex', '-1');
+    });
+  });
+
+  // Find APWG email link
+  const emailLink = document.querySelector(
+    'a[href^="mailto:reportphishing@apwg.org"]'
+  );
+
+  // First visible YouTube video in Related Videos section
+  const firstVisibleVideo = document.querySelector(
+    '.slick-slide.slick-current iframe'
+  );
+
+  if (!emailLink || !firstVisibleVideo) {
+    console.log('Email link or video not found');
+    return;
+  }
+
+  firstVisibleVideo.setAttribute('tabindex', '0');
+
+  // Force focus from email link directly to video
+  emailLink.addEventListener('keydown', function (e) {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      firstVisibleVideo.focus();
+    }
+  });
+
+  console.log(
+    'Accessibility fix applied: hidden slides removed from tab order and focus moves from reportphishing@apwg.org to first visible YouTube video.'
+  );
+
+})();
+
+
+
+*******************************************************************************
 DPM -22393
 
 (function (Drupal) {
