@@ -1,4 +1,139 @@
 
+DPM -22393
+
+(function (Drupal) {
+
+  Drupal.behaviors.wcagLabelInNameFix = {
+    attach(context) {
+
+      // Prevent duplicate processing
+      context.querySelectorAll('.paragraph-content:not([data-wcag-fixed])')
+        .forEach(section => {
+
+          section.setAttribute('data-wcag-fixed', 'true');
+
+          const heading = section.querySelector(
+            '.paragraph-title, .paragraph-subtitle'
+          );
+
+          const headingText = heading
+            ? heading.textContent.replace(/\s+/g, ' ').trim()
+            : '';
+
+          section.querySelectorAll('.paragraph-cta a').forEach(link => {
+
+            const visibleText = link.textContent
+              .replace(/\s+/g, ' ')
+              .trim();
+
+            // ==========================================
+            // Shape what's next in financial trust
+            // ==========================================
+            if (
+              visibleText === 'Learn More' &&
+              headingText.includes("Shape what's next in financial trust")
+            ) {
+
+              link.setAttribute(
+                'aria-label',
+                'Learn More about careers at Early Warning'
+              );
+            }
+
+            // ==========================================
+            // Meet Paze
+            // Reviewer specifically requested that
+            // accessible name match visible text
+            // ==========================================
+            else if (
+              visibleText === 'Paze.com'
+            ) {
+
+              link.removeAttribute('aria-label');
+            }
+
+            // ==========================================
+            // Zelle record article
+            // ==========================================
+            else if (
+              visibleText === 'Read More' &&
+              headingText.includes('Zelle')
+            ) {
+
+              link.setAttribute(
+                'aria-label',
+                'Read More about Zelle shattering records with $1 trillion sent in a single year'
+              );
+            }
+
+            // ==========================================
+            // About Zelle
+            // ==========================================
+            else if (
+              visibleText.includes('About Zelle')
+            ) {
+
+              link.setAttribute(
+                'aria-label',
+                'About Zelle'
+              );
+            }
+
+            // ==========================================
+            // Certos Learn More
+            // ==========================================
+            else if (
+              visibleText === 'Learn More' &&
+              headingText.toLowerCase().includes('certos')
+            ) {
+
+              link.setAttribute(
+                'aria-label',
+                'Learn More about Certos ℠'
+              );
+            }
+
+          });
+        });
+
+      // ==========================================
+      // Fix SM pronunciation
+      // CertosSM -> Certos SM
+      // ==========================================
+      context.querySelectorAll(
+        '.paragraph-title sup, .paragraph-subtitle sup'
+      ).forEach(sup => {
+
+        if (
+          sup.textContent.trim().toUpperCase() === 'SM' &&
+          !sup.hasAttribute('data-sm-fixed')
+        ) {
+
+          sup.setAttribute('data-sm-fixed', 'true');
+          sup.setAttribute('aria-label', 'service mark');
+
+          const prev = sup.previousSibling;
+
+          if (
+            prev &&
+            prev.nodeType === Node.TEXT_NODE &&
+            !prev.textContent.endsWith(' ')
+          ) {
+            prev.textContent += ' ';
+          }
+        }
+      });
+
+    }
+  };
+
+})(Drupal);
+
+
+
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
 (() => {
 
   function initDropdown(dropdown) {
