@@ -1,4 +1,239 @@
 
+*************************************************************************************************************************
+DPM-22552
+*************************************************************************************************************************
+
+For the HTML you provided, the tabs are currently just `<div>` elements with no tab semantics. The following **Drupal JS Injector** code will add all required ARIA roles, states, and relationships to meet the acceptance criteria.
+
+```javascript
+(function () {
+
+  function initAccessibleTabs() {
+
+    const tabList = document.querySelector('.tabs-pagination');
+
+    if (!tabList || tabList.dataset.tabsA11yApplied) {
+      return;
+    }
+
+    tabList.dataset.tabsA11yApplied = 'true';
+
+    /* ---------------------------
+       TABLIST
+    ---------------------------- */
+
+    tabList.setAttribute('role', 'tablist');
+    tabList.setAttribute('aria-label', 'Industry Categories');
+
+    const tabs = tabList.querySelectorAll('.category-tab');
+
+    tabs.forEach(function (tab, index) {
+
+      const slideIndex = tab.getAttribute('data-slide');
+
+      const label =
+        tab.querySelector('.category-tab-label')?.textContent.trim() ||
+        ('Tab ' + (index + 1));
+
+      const tabId = 'industry-tab-' + slideIndex;
+      const panelId = 'industry-panel-' + slideIndex;
+
+      /* ---------------------------
+         TAB
+      ---------------------------- */
+
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('id', tabId);
+      tab.setAttribute('aria-controls', panelId);
+      tab.setAttribute('tabindex', '-1');
+
+      const isSelected =
+        tab.classList.contains('is-active');
+
+      tab.setAttribute(
+        'aria-selected',
+        isSelected ? 'true' : 'false'
+      );
+
+      if (isSelected) {
+        tab.setAttribute('tabindex', '0');
+      }
+
+      /* ---------------------------
+         PANEL
+      ---------------------------- */
+
+      const slide = document.querySelector(
+        '.swiper-slide[aria-label^="' + (Number(slideIndex) + 1) + ' /"]'
+      );
+
+      if (slide) {
+
+        slide.setAttribute('role', 'tabpanel');
+        slide.setAttribute('id', panelId);
+        slide.setAttribute('aria-labelledby', tabId);
+
+        if (isSelected) {
+          slide.removeAttribute('hidden');
+        } else {
+          slide.setAttribute('hidden', '');
+        }
+      }
+
+      /* ---------------------------
+         CLICK SUPPORT
+      ---------------------------- */
+
+      tab.addEventListener('click', function () {
+
+        updateTabs(tabList);
+
+      });
+
+      /* ---------------------------
+         KEYBOARD SUPPORT
+      ---------------------------- */
+
+      tab.addEventListener('keydown', function (e) {
+
+        const currentIndex = [...tabs].indexOf(tab);
+
+        let nextIndex = null;
+
+        switch (e.key) {
+
+          case 'ArrowRight':
+          case 'ArrowDown':
+            nextIndex = (currentIndex + 1) % tabs.length;
+            break;
+
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+            break;
+
+          case 'Home':
+            nextIndex = 0;
+            break;
+
+          case 'End':
+            nextIndex = tabs.length - 1;
+            break;
+
+          default:
+            return;
+        }
+
+        e.preventDefault();
+
+        tabs[nextIndex].focus();
+        tabs[nextIndex].click();
+
+      });
+
+    });
+
+    observeActiveTab(tabList);
+
+  }
+
+  function updateTabs(tabList) {
+
+    const tabs = tabList.querySelectorAll('.category-tab');
+
+    tabs.forEach(function (tab) {
+
+      const selected =
+        tab.classList.contains('is-active');
+
+      tab.setAttribute(
+        'aria-selected',
+        selected ? 'true' : 'false'
+      );
+
+      tab.setAttribute(
+        'tabindex',
+        selected ? '0' : '-1'
+      );
+
+      const panelId = tab.getAttribute('aria-controls');
+
+      const panel = document.getElementById(panelId);
+
+      if (panel) {
+
+        if (selected) {
+          panel.removeAttribute('hidden');
+        } else {
+          panel.setAttribute('hidden', '');
+        }
+
+      }
+
+    });
+
+  }
+
+  function observeActiveTab(tabList) {
+
+    const observer = new MutationObserver(function () {
+
+      updateTabs(tabList);
+
+    });
+
+    tabList.querySelectorAll('.category-tab').forEach(function (tab) {
+
+      observer.observe(tab, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
+    });
+
+  }
+
+  initAccessibleTabs();
+
+  new MutationObserver(initAccessibleTabs).observe(
+    document.body,
+    {
+      childList: true,
+      subtree: true
+    }
+  );
+
+})();
+```
+
+### What this fixes
+
+✅ `role="tablist"` on `.tabs-pagination`
+
+✅ `role="tab"` on each `.category-tab`
+
+✅ `role="tabpanel"` on corresponding `.swiper-slide`
+
+✅ `aria-controls` on every tab
+
+✅ `aria-labelledby` on every panel
+
+✅ `aria-selected="true"` only on active tab
+
+✅ `aria-selected="false"` on inactive tabs
+
+✅ Proper roving tabindex (`0` for selected tab, `-1` for others)
+
+✅ Arrow key navigation (Left/Right/Up/Down)
+
+✅ Home/End key support
+
+✅ Updates automatically when `.is-active` changes
+
+This implementation aligns with the WCAG/EAP tab pattern requirements listed in your acceptance criteria.
+
+*************************************************************************************************************************
+*************************************************************************************************************************
 
 
 *************************************************************************************************************************
