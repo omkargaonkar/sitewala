@@ -1,3 +1,174 @@
+
+
+
+*************************************************************************************************************************
+DPM - 22551
+*************************************************************************************************************************
+Based on the HTML you provided, this is a **Swiper carousel** that currently has:
+
+* `role="list"` on `.swiper-wrapper`
+* `role="group"` on slides
+* Missing `aria-roledescription="carousel"`
+* Missing carousel label
+* Missing slide labels based on actual card title
+* Missing `aria-hidden` management for inactive slides
+* Missing live region settings
+
+Use the following **Drupal JS Injector** code to meet the accessibility acceptance criteria:
+
+```javascript
+(function () {
+
+  function initAccessibleCarousel() {
+
+    document.querySelectorAll('.tabs-with-cards-swipper-wrapper').forEach(function (carousel, index) {
+
+      if (carousel.dataset.a11yProcessed) {
+        return;
+      }
+
+      carousel.dataset.a11yProcessed = 'true';
+
+      /* --------------------------
+         Carousel Container
+      --------------------------- */
+
+      carousel.setAttribute('role', 'region');
+      carousel.setAttribute('aria-roledescription', 'carousel');
+
+      const activeTitle =
+        carousel.querySelector('.swiper-slide-active .big-cta-card-titel');
+
+      const carouselLabel =
+        activeTitle ?
+        activeTitle.textContent.trim() + ' Solutions' :
+        'Industry Solutions';
+
+      carousel.setAttribute('aria-label', carouselLabel);
+
+      carousel.setAttribute('aria-live', 'polite');
+      carousel.setAttribute('aria-atomic', 'false');
+
+      /* --------------------------
+         Slides
+      --------------------------- */
+
+      const slides = carousel.querySelectorAll('.swiper-slide');
+
+      slides.forEach(function (slide, slideIndex) {
+
+        slide.setAttribute('role', 'group');
+        slide.setAttribute('aria-roledescription', 'slide');
+
+        const title = slide.querySelector('.big-cta-card-titel');
+
+        const slideName = title
+          ? title.textContent.trim()
+          : 'Item ' + (slideIndex + 1);
+
+        slide.setAttribute(
+          'aria-label',
+          slideName + ' (' + (slideIndex + 1) + ' of ' + slides.length + ')'
+        );
+
+        if (
+          slide.classList.contains('swiper-slide-active')
+        ) {
+          slide.setAttribute('aria-hidden', 'false');
+        } else {
+          slide.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      /* --------------------------
+         Observe Active Slide Changes
+      --------------------------- */
+
+      const observer = new MutationObserver(function () {
+
+        slides.forEach(function (slide) {
+
+          if (
+            slide.classList.contains('swiper-slide-active')
+          ) {
+
+            slide.setAttribute('aria-hidden', 'false');
+
+            const title = slide.querySelector('.big-cta-card-titel');
+
+            if (title) {
+              carousel.setAttribute(
+                'aria-label',
+                title.textContent.trim() + ' Solutions'
+              );
+            }
+
+          } else {
+
+            slide.setAttribute('aria-hidden', 'true');
+
+          }
+
+        });
+
+      });
+
+      slides.forEach(function (slide) {
+
+        observer.observe(slide, {
+          attributes: true,
+          attributeFilter: ['class']
+        });
+
+      });
+
+    });
+
+  }
+
+  initAccessibleCarousel();
+
+  new MutationObserver(initAccessibleCarousel)
+    .observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+})();
+```
+
+### This fixes
+
+✅ `role="region"` on carousel container
+✅ `aria-roledescription="carousel"`
+✅ Accessible carousel name using visible heading
+✅ `role="group"` on each slide
+✅ `aria-roledescription="slide"` on each slide
+✅ Slide label like:
+
+```html
+aria-label="Financial Institutions (1 of 6)"
+```
+
+✅ `aria-hidden="false"` only on active slide
+✅ `aria-hidden="true"` on inactive slides
+✅ `aria-live="polite"`
+✅ `aria-atomic="false"`
+✅ Automatically updates when Swiper changes slides
+
+This should satisfy the CERTOS acceptance criteria for **"Ensure custom controls provide proper name, role, and state information"** for the carousel portion.
+
+
+*************************************************************************************************************************
+
+*************************************************************************************************************************
+
+
+
+
+
+
+
 DPM-20920
 
 (function (Drupal) {
