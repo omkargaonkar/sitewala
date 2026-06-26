@@ -1,3 +1,193 @@
+
+
+DPM-22544
+(function () {
+
+  if (window.resourceAccessibilityInitialized) return;
+  window.resourceAccessibilityInitialized = true;
+
+  // Focus styles
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .a11y-focus {
+      outline: none !important;
+    }
+
+    .a11y-focus:focus:not(:focus-visible) {
+      outline: none !important;
+    }
+
+    .a11y-focus:focus-visible {
+      outline: 3px solid #000 !important;
+      outline-offset: 2px !important;
+      border-radius: 4px !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+  function openDropdown(dropdown, trigger, menu) {
+    dropdown.classList.add('w--open');
+    menu.classList.add('w--open');
+    menu.style.display = 'block';
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeDropdown(dropdown, trigger, menu) {
+    dropdown.classList.remove('w--open');
+    menu.classList.remove('w--open');
+    menu.style.display = 'none';
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  function initDropdown(dropdown) {
+
+    const trigger = dropdown.querySelector('.resource-dropdown-toggle');
+    const menu = dropdown.querySelector('.resource-dropdown-navigation');
+
+    if (!trigger || !menu) return;
+
+    trigger.classList.add('a11y-focus');
+    trigger.setAttribute('role', 'button');
+    trigger.setAttribute('tabindex', '0');
+
+    const labels = menu.querySelectorAll('.filter-button-option');
+
+    labels.forEach(label => {
+
+      const radio = label.querySelector('input[type="radio"]');
+
+      if (!radio) return;
+
+      label.classList.add('a11y-focus');
+      label.setAttribute('tabindex', '0');
+
+      // Mouse click
+      label.addEventListener('click', () => {
+
+        setTimeout(() => {
+
+          closeDropdown(dropdown, trigger, menu);
+
+          trigger.focus();
+
+        }, 300);
+
+      });
+
+      // Keyboard support
+      label.addEventListener('keydown', e => {
+
+        switch (e.key) {
+
+          case 'Enter':
+          case ' ':
+
+            e.preventDefault();
+
+            // Let Finsweet handle the filter
+            label.click();
+
+            break;
+
+          case 'Escape':
+
+            e.preventDefault();
+
+            closeDropdown(dropdown, trigger, menu);
+
+            trigger.focus();
+
+            break;
+        }
+
+      });
+
+    });
+
+    // Open/Close dropdown
+    trigger.addEventListener('keydown', e => {
+
+      if (e.key === 'Enter' || e.key === ' ') {
+
+        e.preventDefault();
+
+        const expanded =
+          trigger.getAttribute('aria-expanded') === 'true';
+
+        if (expanded) {
+
+          closeDropdown(dropdown, trigger, menu);
+
+        } else {
+
+          openDropdown(dropdown, trigger, menu);
+
+          const firstOption =
+            menu.querySelector('.filter-button-option');
+
+          if (firstOption) {
+            firstOption.focus();
+          }
+        }
+      }
+    });
+
+  }
+
+  // Initialize dropdowns
+  document
+    .querySelectorAll('.resource-filter-dropdown')
+    .forEach(initDropdown);
+
+  // Applied filter remove buttons
+  document
+    .querySelectorAll('[fs-list-element="tag-remove"]')
+    .forEach(btn => {
+
+      btn.classList.add('a11y-focus');
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('tabindex', '0');
+
+      btn.addEventListener('keydown', e => {
+
+        if (e.key === 'Enter' || e.key === ' ') {
+
+          e.preventDefault();
+          btn.click();
+
+        }
+
+      });
+
+    });
+
+  // Clear filters button
+  document
+    .querySelectorAll('[fs-list-element="clear"]')
+    .forEach(btn => {
+
+      btn.classList.add('a11y-focus');
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('tabindex', '0');
+
+      btn.addEventListener('keydown', e => {
+
+        if (e.key === 'Enter' || e.key === ' ') {
+
+          e.preventDefault();
+          btn.click();
+
+        }
+
+      });
+
+    });
+
+})();
+
+*****************************************************************************************************
+
+
 DPM-22544
 (function () {
 
