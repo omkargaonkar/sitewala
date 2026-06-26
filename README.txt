@@ -1,3 +1,236 @@
+DPM-22544
+(function () {
+
+  function initAccessibility() {
+
+    // ==========================
+    // Clear All Filters
+    // ==========================
+    document
+      .querySelectorAll('[fs-list-element="clear"]')
+      .forEach(btn => {
+
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('aria-label', 'Clear all filters');
+
+        btn.addEventListener('keydown', function (e) {
+
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+    // ==========================
+    // Applied Filter Remove Buttons
+    // ==========================
+    document
+      .querySelectorAll('[fs-list-element="tag-remove"]')
+      .forEach(removeBtn => {
+
+        removeBtn.setAttribute('role', 'button');
+        removeBtn.setAttribute('tabindex', '0');
+
+        const tag = removeBtn.closest('[fs-list-element="tag"]');
+
+        const value =
+          tag?.querySelector('[fs-list-element="tag-value"]')
+            ?.textContent
+            ?.trim();
+
+        if (value) {
+          removeBtn.setAttribute(
+            'aria-label',
+            'Remove filter ' + value
+          );
+        }
+
+        removeBtn.addEventListener('keydown', function (e) {
+
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+    // ==========================
+    // Dropdown Toggle Accessibility
+    // ==========================
+    document
+      .querySelectorAll('.resource-dropdown-toggle')
+      .forEach(toggle => {
+
+        toggle.setAttribute('role', 'button');
+        toggle.setAttribute('tabindex', '0');
+
+        toggle.addEventListener('keydown', function (e) {
+
+          if (
+            e.key === 'Enter' ||
+            e.key === ' '
+          ) {
+
+            e.preventDefault();
+
+            this.click();
+
+            setTimeout(() => {
+
+              const menuId =
+                this.getAttribute('aria-controls');
+
+              const menu =
+                document.getElementById(menuId);
+
+              if (!menu) return;
+
+              const firstOption =
+                menu.querySelector(
+                  'input[type="radio"]'
+                );
+
+              if (firstOption) {
+                firstOption.focus();
+              }
+
+            }, 150);
+          }
+
+          // Down Arrow opens dropdown
+          if (e.key === 'ArrowDown') {
+
+            e.preventDefault();
+
+            this.click();
+
+            setTimeout(() => {
+
+              const menu =
+                document.getElementById(
+                  this.getAttribute('aria-controls')
+                );
+
+              const firstOption =
+                menu?.querySelector(
+                  'input[type="radio"]'
+                );
+
+              if (firstOption) {
+                firstOption.focus();
+              }
+
+            }, 150);
+          }
+        });
+      });
+
+    // ==========================
+    // Radio Buttons
+    // ==========================
+    document
+      .querySelectorAll(
+        '.resource-dropdown-navigation input[type="radio"]'
+      )
+      .forEach(radio => {
+
+        radio.setAttribute('tabindex', '0');
+
+        radio.addEventListener('keydown', function (e) {
+
+          const radios =
+            Array.from(
+              document.querySelectorAll(
+                'input[name="' + this.name + '"]'
+              )
+            );
+
+          const currentIndex =
+            radios.indexOf(this);
+
+          // Select with Enter/Space
+          if (
+            e.key === 'Enter' ||
+            e.key === ' '
+          ) {
+
+            e.preventDefault();
+
+            this.checked = true;
+
+            this.dispatchEvent(
+              new Event('change', {
+                bubbles: true
+              })
+            );
+          }
+
+          // Arrow Down
+          if (e.key === 'ArrowDown') {
+
+            e.preventDefault();
+
+            const next =
+              radios[currentIndex + 1];
+
+            if (next) {
+              next.focus();
+            }
+          }
+
+          // Arrow Up
+          if (e.key === 'ArrowUp') {
+
+            e.preventDefault();
+
+            const prev =
+              radios[currentIndex - 1];
+
+            if (prev) {
+              prev.focus();
+            }
+          }
+
+          // Escape closes dropdown
+          if (e.key === 'Escape') {
+
+            const dropdown =
+              this.closest('.w-dropdown-list');
+
+            const toggle =
+              document.getElementById(
+                dropdown?.getAttribute('aria-labelledby')
+              );
+
+            if (toggle) {
+              toggle.focus();
+              toggle.click();
+            }
+          }
+        });
+      });
+  }
+
+  initAccessibility();
+
+  // Reapply after filtering updates
+  const observer = new MutationObserver(() => {
+    initAccessibility();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+
+
+
+
+
 
 *************************************************************************************************************************
 DPM-22552
