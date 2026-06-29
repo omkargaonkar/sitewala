@@ -1,4 +1,63 @@
+***************************************************************************************************
+DPM-22553
+***************************************************************************************************
+(function () {
 
+  if (window.decorativeImagesAccessibilityFixed) return;
+  window.decorativeImagesAccessibilityFixed = true;
+
+  function fixDecorativeImages() {
+
+    document.querySelectorAll('img').forEach(function (img) {
+
+      // Skip meaningful images
+      if (img.closest('[role="img"]')) return;
+
+      // Button arrows
+      if (img.classList.contains('button-arrow')) {
+        img.setAttribute('alt', '');
+        img.setAttribute('aria-hidden', 'true');
+        img.setAttribute('role', 'presentation');
+        return;
+      }
+
+      // Images already marked decorative
+      if (img.getAttribute('alt') === '') {
+        img.setAttribute('aria-hidden', 'true');
+        img.setAttribute('role', 'presentation');
+      }
+
+    });
+
+    // Decorative inline SVGs
+    document.querySelectorAll('svg').forEach(function (svg) {
+
+      if (
+        svg.closest('button') ||
+        svg.closest('a') ||
+        svg.classList.contains('button-arrow')
+      ) {
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('focusable', 'false');
+        svg.setAttribute('role', 'presentation');
+      }
+
+    });
+
+  }
+
+  fixDecorativeImages();
+
+  new MutationObserver(fixDecorativeImages).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+
+***************************************************************************************************
+***************************************************************************************************
+***************************************************************************
 
 (function () {
 
