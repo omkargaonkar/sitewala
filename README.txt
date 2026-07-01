@@ -7,6 +7,144 @@ DPM-22794
   Drupal.behaviors.slickAccessibilityFix = {
     attach: function (context) {
 
+      $('.slick', context).each(function () {
+
+        var $slider = $(this);
+
+        // Prevent duplicate initialization
+        if ($slider.data('slickAccessibilityInitialized')) {
+          return;
+        }
+        $slider.data('slickAccessibilityInitialized', true);
+
+        function updateAccessibility() {
+
+          // Remove unnecessary tabindex from slide containers
+          $slider.find('.slick__slide[role="tabpanel"]').removeAttr('tabindex');
+
+          $slider.find('.slick__slide[role="tabpanel"]').each(function () {
+
+            var $slide = $(this);
+            var active = $slide.hasClass('slick-active') &&
+                         $slide.attr('aria-hidden') === 'false';
+
+            // Manage all focusable elements
+            $slide.find('a, button, input, select, textarea, iframe').each(function () {
+
+              if (active) {
+
+                if (this.tagName.toLowerCase() === 'a') {
+                  $(this).removeAttr('tabindex');
+                } else {
+                  $(this).attr('tabindex', '0');
+                }
+
+              } else {
+
+                $(this).attr('tabindex', '-1');
+
+              }
+
+            });
+
+          });
+
+          // Update carousel dots
+          $slider.find('.slick-dots li').each(function () {
+
+            var $li = $(this);
+            var $btn = $li.find('[role="tab"]');
+
+            if (!$btn.length) {
+              return;
+            }
+
+            if ($li.hasClass('slick-active')) {
+              $btn.attr({
+                'aria-selected': 'true',
+                'tabindex': '0'
+              });
+            } else {
+              $btn.attr({
+                'aria-selected': 'false',
+                'tabindex': '-1'
+              });
+            }
+
+          });
+
+          // Remove hidden Previous/Next buttons from tab order
+          $slider.find('.slick-prev.visually-hidden, .slick-next.visually-hidden').attr({
+            'tabindex': '-1',
+            'aria-hidden': 'true'
+          });
+
+        }
+
+        // Initial execution
+        updateAccessibility();
+
+        // After every slide change
+        $slider.on('afterChange', function () {
+          setTimeout(updateAccessibility, 50);
+        });
+
+        // Keyboard support for carousel dots
+        $slider.find('.slick-dots [role="tab"]').on('keydown', function (e) {
+
+          var $tabs = $slider.find('.slick-dots [role="tab"]');
+          var index = $tabs.index(this);
+          var next;
+
+          switch (e.key) {
+
+            case 'ArrowRight':
+            case 'ArrowDown':
+              e.preventDefault();
+              next = (index + 1) % $tabs.length;
+              $tabs.eq(next).trigger('click').focus();
+              break;
+
+            case 'ArrowLeft':
+            case 'ArrowUp':
+              e.preventDefault();
+              next = (index - 1 + $tabs.length) % $tabs.length;
+              $tabs.eq(next).trigger('click').focus();
+              break;
+
+            case 'Home':
+              e.preventDefault();
+              $tabs.eq(0).trigger('click').focus();
+              break;
+
+            case 'End':
+              e.preventDefault();
+              $tabs.eq($tabs.length - 1).trigger('click').focus();
+              break;
+
+            case 'Enter':
+            case ' ':
+              e.preventDefault();
+              $(this).trigger('click');
+              break;
+          }
+
+        });
+
+      });
+
+    }
+  };
+
+})(jQuery, Drupal);
+****************************************************************************
+DPM-22794
+********************************************************************************
+(function ($, Drupal) {
+
+  Drupal.behaviors.slickAccessibilityFix = {
+    attach: function (context) {
+
       $('.slick', context).once('slickAccessibilityFix').each(function () {
 
         var $slider = $(this);
