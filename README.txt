@@ -1,5 +1,74 @@
 
 ******************************************************************************
+DPM-22794  -4
+********************************************************************************
+
+(function () {
+
+  // Prevent duplicate execution
+  if (window.slickRemoveTabindexInit) return;
+  window.slickRemoveTabindexInit = true;
+
+  function removeTabindex() {
+    document.querySelectorAll('.slick__slide a[tabindex]').forEach(function (link) {
+      link.removeAttribute('tabindex');
+    });
+  }
+
+  function init() {
+
+    removeTabindex();
+
+    // Watch for Slick DOM updates
+    const observer = new MutationObserver(function () {
+      removeTabindex();
+    });
+
+    document.querySelectorAll('.slick').forEach(function (slider) {
+      observer.observe(slider, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'tabindex']
+      });
+    });
+
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+
+
+
+(function () {
+
+    function removeTabindex() {
+        document.querySelectorAll('.slick__slide a[tabindex]').forEach(function (link) {
+            link.removeAttribute('tabindex');
+        });
+    }
+
+    removeTabindex();
+
+    // Re-run if Slick updates the DOM
+    const observer = new MutationObserver(removeTabindex);
+
+    document.querySelectorAll('.slick').forEach(function (slider) {
+        observer.observe(slider, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    });
+
+})();
+******************************************************************************
 DPM-22794  -3
 ********************************************************************************
 
