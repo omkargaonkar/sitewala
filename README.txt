@@ -1,4 +1,189 @@
 
+**********************************************************************************************
+DPM-22793
+**********************************************************************************************
+
+The error confirms that the tab panels (`#419796sendmoney-pane`, etc.) are **not present in the DOM** when your script runs. So the JavaScript should **not depend on them**. Below is a WCAG-compliant solution that:
+
+* ✅ Supports **Tab** key (only the active tab is tabbable).
+* ✅ Supports **Arrow Up/Down** (vertical tablist).
+* ✅ Supports **Home/End**.
+* ✅ Updates `aria-selected` and `tabindex`.
+* ✅ Works with Bootstrap Tabs.
+* ✅ Doesn't throw an error if the tab panel doesn't exist yet.
+* ✅ Updates the `role="tabpanel"` and `aria-labelledby` if the panel exists.
+
+```javascript
+(function () {
+
+    document.querySelectorAll('[role="tablist"]').forEach(function (tablist) {
+
+        // Label the tablist
+        const heading = tablist.parentElement.querySelector('h2');
+
+        if (heading) {
+            if (!heading.id) {
+                heading.id = 'tablist-heading-' + Math.random().toString(36).substr(2, 9);
+            }
+            tablist.setAttribute('aria-labelledby', heading.id);
+        }
+
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+
+        if (!tabs.length) return;
+
+        function activateTab(tab, focusTab) {
+
+            tabs.forEach(function (t) {
+
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
+                t.classList.remove('active');
+
+            });
+
+            tab.setAttribute('aria-selected', 'true');
+            tab.setAttribute('tabindex', '0');
+            tab.classList.add('active');
+
+            // Bootstrap Tab
+            if (window.bootstrap && bootstrap.Tab) {
+                bootstrap.Tab.getOrCreateInstance(tab).show();
+            } else {
+                tab.click();
+            }
+
+            // Update panel if present
+            const panelId = tab.getAttribute('aria-controls');
+
+            if (panelId) {
+
+                const panel = document.getElementById(panelId);
+
+                if (panel) {
+                    panel.setAttribute('role', 'tabpanel');
+                    panel.setAttribute('aria-labelledby', tab.id);
+                }
+
+            }
+
+            if (focusTab) {
+                tab.focus();
+            }
+
+        }
+
+        tabs.forEach(function (tab) {
+
+            // Initial tabindex
+            tab.setAttribute(
+                'tabindex',
+                tab.getAttribute('aria-selected') === 'true'
+                    ? '0'
+                    : '-1'
+            );
+
+            // Initialize panel if it exists
+            const panelId = tab.getAttribute('aria-controls');
+
+            if (panelId) {
+
+                const panel = document.getElementById(panelId);
+
+                if (panel) {
+
+                    panel.setAttribute('role', 'tabpanel');
+                    panel.setAttribute('aria-labelledby', tab.id);
+
+                    if (!panel.hasAttribute('tabindex')) {
+                        panel.tabIndex = 0;
+                    }
+
+                }
+
+            }
+
+            tab.addEventListener('click', function () {
+                activateTab(tab, false);
+            });
+
+            tab.addEventListener('keydown', function (e) {
+
+                const current = tabs.indexOf(tab);
+
+                let next = current;
+
+                switch (e.key) {
+
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        next = (current + 1) % tabs.length;
+                        activateTab(tabs[next], true);
+                        break;
+
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        next = (current - 1 + tabs.length) % tabs.length;
+                        activateTab(tabs[next], true);
+                        break;
+
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        next = (current + 1) % tabs.length;
+                        activateTab(tabs[next], true);
+                        break;
+
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        next = (current - 1 + tabs.length) % tabs.length;
+                        activateTab(tabs[next], true);
+                        break;
+
+                    case 'Home':
+                        e.preventDefault();
+                        activateTab(tabs[0], true);
+                        break;
+
+                    case 'End':
+                        e.preventDefault();
+                        activateTab(tabs[tabs.length - 1], true);
+                        break;
+                }
+
+            });
+
+        });
+
+    });
+
+})();
+```
+
+### One important note
+
+From the HTML you posted, the **desktop tab panels are missing**. A Bootstrap tab component should have something like:
+
+```html
+<div class="tab-content">
+    <div id="419796sendmoney-pane" class="tab-pane">...</div>
+    <div id="419796receivemoney-pane" class="tab-pane">...</div>
+    ...
+</div>
+```
+
+Without those elements, the Accessibility Scanner will still report **missing `role="tabpanel"`**, because JavaScript cannot add attributes to elements that don't exist.
+
+If this is a **Drupal/Bootstrap page**, the missing HTML is probably in another template file.
+
+If your goal is to **pass the entire DPM-22793 accessibility ticket**, I can provide a **single JavaScript file** that also dynamically creates any missing ARIA relationships and fully follows the WAI-ARIA Authoring Practices for Tabs. That version is suitable for production and accessibility testing.
+
+
+
+***************************************************************************************************************
+
+
+
+
 Here are a few LinkedIn post options you can use with your certificate:
 
 Option 1 (Professional)
