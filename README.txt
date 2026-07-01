@@ -6,6 +6,58 @@
 
     function removeTabindex() {
 
+        // Remove tabindex only from headings and paragraphs inside Slick
+        document.querySelectorAll(
+            '.slick-list h1[tabindex], ' +
+            '.slick-list h2[tabindex], ' +
+            '.slick-list h3[tabindex], ' +
+            '.slick-list h4[tabindex], ' +
+            '.slick-list h5[tabindex], ' +
+            '.slick-list h6[tabindex], ' +
+            '.slick-list p[tabindex]'
+        ).forEach(function (element) {
+            element.removeAttribute('tabindex');
+        });
+
+    }
+
+    function init() {
+
+        removeTabindex();
+
+        // Watch for Slick updates
+        const observer = new MutationObserver(removeTabindex);
+
+        document.querySelectorAll('.slick-list').forEach(function (slickList) {
+            observer.observe(slickList, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['tabindex']
+            });
+        });
+
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
+
+
+*********************************************************
+
+(function () {
+
+    // Prevent duplicate execution
+    if (window.removeHeadingParagraphTabindex) return;
+    window.removeHeadingParagraphTabindex = true;
+
+    function removeTabindex() {
+
         // Remove tabindex from all H1-H6 and P elements
         document.querySelectorAll('h1[tabindex], h2[tabindex], h3[tabindex], h4[tabindex], h5[tabindex], h6[tabindex], p[tabindex]').forEach(function (element) {
             element.removeAttribute('tabindex');
