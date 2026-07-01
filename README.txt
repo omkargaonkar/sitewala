@@ -1,4 +1,4 @@
-
+Investigated the issue and implemented keyboard accessibility for the vertical tablist as per WCAG/WAI-ARIA Authoring Practices. Added support for Tab, Arrow Up/Down, Home, and End key navigation, while updating aria-selected and tabindex dynamically. Further validation identified that the corresponding tabpanel elements referenced by aria-controls are not present in the current DOM, which must be available in the markup to fully satisfy the accessibility requirements.
 **********************************************************************************************
 DPM-22793
 **********************************************************************************************
