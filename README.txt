@@ -1,3 +1,37 @@
+************************************************
+DPM-22795
+**************************************************
+(function () {
+
+  // Prevent duplicate execution
+  if (window.removeRedundantAnchorTabindex) return;
+  window.removeRedundantAnchorTabindex = true;
+
+  function removeAnchorTabindex() {
+
+    document.querySelectorAll('a[href][tabindex="0"]').forEach(function (link) {
+      link.removeAttribute('tabindex');
+    });
+
+  }
+
+  // Initial run
+  removeAnchorTabindex();
+
+  // Observe dynamically added content
+  const observer = new MutationObserver(function () {
+    removeAnchorTabindex();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+
+*******************************************************************************
+
 (function () {
 
     // Prevent duplicate execution
