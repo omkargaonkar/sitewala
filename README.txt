@@ -1,3 +1,268 @@
+(function () {
+
+    // Prevent duplicate initialization
+    if (window.carouselAccessibilityFixInitialized) return;
+    window.carouselAccessibilityFixInitialized = true;
+
+    function initCarouselAccessibility() {
+
+        document.querySelectorAll('.paragraph-wrapper[aria-roledescription="carousel"]').forEach(function (carousel, carouselIndex) {
+
+            // Prevent duplicate processing
+            if (carousel.dataset.a11yInitialized) return;
+            carousel.dataset.a11yInitialized = "true";
+
+            //-------------------------------------------------
+            // Carousel Container
+            //-------------------------------------------------
+
+            carousel.setAttribute('role', 'region');
+            carousel.setAttribute('aria-roledescription', 'carousel');
+
+            if (!carousel.hasAttribute('aria-label') &&
+                !carousel.hasAttribute('aria-labelledby')) {
+
+                carousel.setAttribute(
+                    'aria-label',
+                    'Featured content'
+                );
+            }
+
+            //-------------------------------------------------
+            // Live Region
+            //-------------------------------------------------
+
+            var slider = carousel.querySelector('.slick-track');
+
+            if (slider) {
+
+                slider.setAttribute('aria-live', 'polite');
+                slider.setAttribute('aria-atomic', 'false');
+
+            }
+
+            //-------------------------------------------------
+            // Slides
+            //-------------------------------------------------
+
+            var slides = carousel.querySelectorAll('.slick__slide:not(.slick-cloned)');
+            var total = slides.length;
+
+            slides.forEach(function (slide, index) {
+
+                var container = slide.querySelector('.paragraph');
+
+                if (!container) return;
+
+                container.setAttribute('role', 'group');
+                container.setAttribute('aria-roledescription', 'slide');
+
+                container.setAttribute(
+                    'aria-label',
+                    (index + 1) + ' of ' + total
+                );
+
+            });
+
+            //-------------------------------------------------
+            // Hide cloned slides
+            //-------------------------------------------------
+
+            carousel.querySelectorAll('.slick-cloned').forEach(function (clone) {
+
+                clone.setAttribute('aria-hidden', 'true');
+
+                clone.querySelectorAll('a, button, input, select, textarea').forEach(function (el) {
+
+                    el.setAttribute('tabindex', '-1');
+
+                });
+
+            });
+
+            //-------------------------------------------------
+            // Previous / Next Buttons
+            //-------------------------------------------------
+
+            var prev = carousel.querySelector('.slick-prev');
+            var next = carousel.querySelector('.slick-next');
+
+            if (prev) {
+
+                prev.type = "button";
+                prev.setAttribute('aria-label', 'Previous slide');
+                prev.setAttribute('aria-controls', 'carousel-' + carouselIndex);
+
+            }
+
+            if (next) {
+
+                next.type = "button";
+                next.setAttribute('aria-label', 'Next slide');
+                next.setAttribute('aria-controls', 'carousel-' + carouselIndex);
+
+            }
+
+            carousel.id = 'carousel-' + carouselIndex;
+
+            //-------------------------------------------------
+            // Rotation Button (if autoplay)
+            //-------------------------------------------------
+
+            if (!carousel.querySelector('.carousel-rotation-toggle')) {
+
+                var toggle = document.createElement('button');
+
+                toggle.type = "button";
+                toggle.className = "carousel-rotation-toggle";
+                toggle.textContent = "Pause";
+                toggle.setAttribute('aria-label', 'Pause automatic slide rotation');
+
+                var paused = false;
+
+                toggle.addEventListener('click', function () {
+
+                    paused = !paused;
+
+                    if (window.jQuery) {
+
+                        var slick = window.jQuery(carousel).find('.slick__slider');
+
+                        if (paused) {
+
+                            slick.slick('slickPause');
+
+                            toggle.textContent = "Play";
+                            toggle.setAttribute(
+                                'aria-label',
+                                'Resume automatic slide rotation'
+                            );
+
+                        } else {
+
+                            slick.slick('slickPlay');
+
+                            toggle.textContent = "Pause";
+                            toggle.setAttribute(
+                                'aria-label',
+                                'Pause automatic slide rotation'
+                            );
+
+                        }
+
+                    }
+
+                });
+
+                var nav = carousel.querySelector('.slick__arrow');
+
+                if (nav) {
+
+                    nav.appendChild(toggle);
+
+                }
+
+            }
+
+            //-------------------------------------------------
+            // Update Active Slide
+            //-------------------------------------------------
+
+            function updateSlides() {
+
+                carousel.querySelectorAll('.slick__slide').forEach(function (slide) {
+
+                    var container = slide.querySelector('.paragraph');
+
+                    if (!container) return;
+
+                    var active = slide.classList.contains('slick-active') &&
+                                 !slide.classList.contains('slick-cloned');
+
+                    container.setAttribute(
+                        'aria-hidden',
+                        active ? 'false' : 'true'
+                    );
+
+                    container.querySelectorAll('a, button, input, textarea, select').forEach(function (el) {
+
+                        if (active) {
+
+                            el.removeAttribute('tabindex');
+
+                        } else {
+
+                            el.setAttribute('tabindex', '-1');
+
+                        }
+
+                    });
+
+                });
+
+            }
+
+            updateSlides();
+
+            //-------------------------------------------------
+            // Watch for slide changes
+            //-------------------------------------------------
+
+            var track = carousel.querySelector('.slick-track');
+
+            if (track) {
+
+                new MutationObserver(function () {
+
+                    updateSlides();
+
+                }).observe(track, {
+
+                    attributes: true,
+                    subtree: true,
+                    attributeFilter: ['class']
+
+                });
+
+            }
+
+        });
+
+    }
+
+    //---------------------------------------------------------
+    // Wait until Slick loads
+    //---------------------------------------------------------
+
+    function waitForSlick() {
+
+        if (document.querySelector('.slick-initialized')) {
+
+            initCarouselAccessibility();
+
+        } else {
+
+            setTimeout(waitForSlick, 300);
+
+        }
+
+    }
+
+    if (document.readyState === "loading") {
+
+        document.addEventListener("DOMContentLoaded", waitForSlick);
+
+    } else {
+
+        waitForSlick();
+
+    }
+
+})();
+
+
+
+
 ************************************************
 DPM-22795
 **************************************************
