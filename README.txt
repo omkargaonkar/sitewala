@@ -1,4 +1,43 @@
+(function () {
 
+    // Prevent duplicate execution
+    if (window.removeHeadingParagraphTabindex) return;
+    window.removeHeadingParagraphTabindex = true;
+
+    function removeTabindex() {
+
+        // Remove tabindex from all H1-H6 and P elements
+        document.querySelectorAll('h1[tabindex], h2[tabindex], h3[tabindex], h4[tabindex], h5[tabindex], h6[tabindex], p[tabindex]').forEach(function (element) {
+            element.removeAttribute('tabindex');
+        });
+
+    }
+
+    function init() {
+
+        removeTabindex();
+
+        // Watch for Drupal AJAX / Slick updates
+        const observer = new MutationObserver(function () {
+            removeTabindex();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['tabindex']
+        });
+
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
 ******************************************************************************
 DPM-22794  -4
 ********************************************************************************
