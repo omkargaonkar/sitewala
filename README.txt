@@ -1,3 +1,127 @@
+
+******************************************************************************
+DPM-22794
+********************************************************************************
+(function ($, Drupal) {
+
+  Drupal.behaviors.slickAccessibilityFix = {
+    attach: function (context) {
+
+      $('.slick', context).once('slickAccessibilityFix').each(function () {
+
+        var $slider = $(this);
+
+        function updateAccessibility() {
+
+          // Remove unnecessary tabindex from all slide containers
+          $slider.find('.slick__slide[role="tabpanel"]').removeAttr('tabindex');
+
+          $slider.find('.slick__slide[role="tabpanel"]').each(function () {
+
+            var $slide = $(this);
+            var active = $slide.hasClass('slick-active') &&
+                         $slide.attr('aria-hidden') === 'false';
+
+            // Manage focusable elements
+            $slide.find('a, button, iframe, input, select, textarea').each(function () {
+
+              if (active) {
+
+                if (this.tagName.toLowerCase() === 'a') {
+                  $(this).removeAttr('tabindex');
+                } else {
+                  this.tabIndex = 0;
+                }
+
+              } else {
+
+                this.tabIndex = -1;
+
+              }
+
+            });
+
+          });
+
+          // Update dot buttons
+          $slider.find('.slick-dots li').each(function () {
+
+            var $li = $(this);
+            var $btn = $li.find('[role="tab"]');
+
+            if (!$btn.length) {
+              return;
+            }
+
+            if ($li.hasClass('slick-active')) {
+              $btn.attr({
+                'aria-selected': 'true',
+                'tabindex': '0'
+              });
+            } else {
+              $btn.attr({
+                'aria-selected': 'false',
+                'tabindex': '-1'
+              });
+            }
+
+          });
+
+        }
+
+        // Initial run
+        updateAccessibility();
+
+        // Run after Slick changes slides
+        $slider.on('afterChange', function () {
+          setTimeout(updateAccessibility, 50);
+        });
+
+        // Keyboard support for carousel dots
+        $slider.find('.slick-dots [role="tab"]').on('keydown', function (e) {
+
+          var $tabs = $slider.find('.slick-dots [role="tab"]');
+          var index = $tabs.index(this);
+          var next;
+
+          switch (e.key) {
+
+            case 'ArrowRight':
+              e.preventDefault();
+              next = (index + 1) % $tabs.length;
+              $tabs.eq(next).trigger('click').focus();
+              break;
+
+            case 'ArrowLeft':
+              e.preventDefault();
+              next = (index - 1 + $tabs.length) % $tabs.length;
+              $tabs.eq(next).trigger('click').focus();
+              break;
+
+            case 'Home':
+              e.preventDefault();
+              $tabs.eq(0).trigger('click').focus();
+              break;
+
+            case 'End':
+              e.preventDefault();
+              $tabs.eq($tabs.length - 1).trigger('click').focus();
+              break;
+          }
+
+        });
+
+      });
+
+    }
+  };
+
+})(jQuery, Drupal);
+
+
+*****************************************************************************************
+
+
 (function ($, Drupal, once) {
   Drupal.behaviors.verticalTabsAccessibility = {
     attach: function (context) {
