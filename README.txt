@@ -1,3 +1,118 @@
+(function ($, Drupal, once) {
+  Drupal.behaviors.verticalTabsAccessibility = {
+    attach: function (context) {
+
+      once('verticalTabsAccessibility', '[role="tablist"]', context).forEach(function (tablist) {
+
+        // Label the tablist
+        const heading = tablist.parentElement.querySelector('h2');
+
+        if (heading) {
+          if (!heading.id) {
+            heading.id = 'tablist-heading-' + Math.random().toString(36).substr(2, 9);
+          }
+          tablist.setAttribute('aria-labelledby', heading.id);
+        }
+
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+
+        if (!tabs.length) return;
+
+        function activateTab(tab, focusTab) {
+
+          tabs.forEach(function (t) {
+            t.setAttribute('aria-selected', 'false');
+            t.setAttribute('tabindex', '-1');
+            t.classList.remove('active');
+          });
+
+          tab.setAttribute('aria-selected', 'true');
+          tab.setAttribute('tabindex', '0');
+          tab.classList.add('active');
+
+          // Bootstrap Tab
+          if (window.bootstrap && bootstrap.Tab) {
+            bootstrap.Tab.getOrCreateInstance(tab).show();
+          } else {
+            tab.click();
+          }
+
+          // Update panel if present
+          const panelId = tab.getAttribute('aria-controls');
+
+          if (panelId) {
+            const panel = document.getElementById(panelId);
+
+            if (panel) {
+              panel.setAttribute('role', 'tabpanel');
+              panel.setAttribute('aria-labelledby', tab.id);
+
+              if (!panel.hasAttribute('tabindex')) {
+                panel.tabIndex = 0;
+              }
+            }
+          }
+
+          if (focusTab) {
+            tab.focus();
+          }
+        }
+
+        tabs.forEach(function (tab) {
+
+          tab.setAttribute(
+            'tabindex',
+            tab.getAttribute('aria-selected') === 'true' ? '0' : '-1'
+          );
+
+          tab.addEventListener('click', function () {
+            activateTab(tab, false);
+          });
+
+          tab.addEventListener('keydown', function (e) {
+
+            const current = tabs.indexOf(tab);
+            let next = current;
+
+            switch (e.key) {
+
+              case 'ArrowDown':
+              case 'ArrowRight':
+                e.preventDefault();
+                next = (current + 1) % tabs.length;
+                activateTab(tabs[next], true);
+                break;
+
+              case 'ArrowUp':
+              case 'ArrowLeft':
+                e.preventDefault();
+                next = (current - 1 + tabs.length) % tabs.length;
+                activateTab(tabs[next], true);
+                break;
+
+              case 'Home':
+                e.preventDefault();
+                activateTab(tabs[0], true);
+                break;
+
+              case 'End':
+                e.preventDefault();
+                activateTab(tabs[tabs.length - 1], true);
+                break;
+            }
+
+          });
+
+        });
+
+      });
+
+    }
+  };
+})(jQuery, Drupal, once);
+
+**********************************************************************
+
 Investigated the issue and implemented keyboard accessibility for the vertical tablist as per WCAG/WAI-ARIA Authoring Practices. Added support for Tab, Arrow Up/Down, Home, and End key navigation, while updating aria-selected and tabindex dynamically. Further validation identified that the corresponding tabpanel elements referenced by aria-controls are not present in the current DOM, which must be available in the markup to fully satisfy the accessibility requirements.
 **********************************************************************************************
 DPM-22793
