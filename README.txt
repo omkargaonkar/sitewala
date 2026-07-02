@@ -1,3 +1,193 @@
+******************************************************************************************
+DPM-22797
+**************************************************************************************
+Below is a **single Drupal JS Injector compatible script** that addresses **only** the issues you listed.
+
+**✔ Fixes included**
+
+* ✅ Adds `role="region"` to carousel container
+* ✅ Adds `aria-roledescription="carousel"`
+* ✅ Adds accessible `aria-label`
+* ✅ Corrects slide labels (`1 of N`, `2 of N`, ...)
+* ✅ Updates `aria-hidden` dynamically
+* ✅ Adds `aria-live` and `aria-atomic`
+* ✅ Removes unnecessary `tabindex="0"` from active links
+* ✅ Keeps `tabindex="-1"` on inactive slide links
+* ✅ Automatically updates after every Slick slide change
+* ✅ Prevents duplicate initialization
+
+```javascript
+(function () {
+
+    // Prevent duplicate initialization
+    if (window.carouselAccessibilityInitialized) return;
+    window.carouselAccessibilityInitialized = true;
+
+    function initCarouselAccessibility() {
+
+        document.querySelectorAll('.slick').forEach(function (carousel) {
+
+            if (carousel.dataset.carouselA11yInitialized) return;
+            carousel.dataset.carouselA11yInitialized = "true";
+
+            //----------------------------------------------------
+            // Carousel Container
+            //----------------------------------------------------
+
+            var container =
+                carousel.closest('.paragraph-wrapper') ||
+                carousel.querySelector('.paragraph-wrapper') ||
+                carousel;
+
+            container.setAttribute('role', 'region');
+            container.setAttribute('aria-roledescription', 'carousel');
+
+            if (!container.hasAttribute('aria-label') &&
+                !container.hasAttribute('aria-labelledby')) {
+                container.setAttribute('aria-label', 'Featured Resources');
+            }
+
+            //----------------------------------------------------
+            // Live Region
+            //----------------------------------------------------
+
+            var track = carousel.querySelector('.slick-track');
+
+            if (track) {
+                track.setAttribute('aria-live', 'polite');
+                track.setAttribute('aria-atomic', 'false');
+            }
+
+            //----------------------------------------------------
+            // Update Slides
+            //----------------------------------------------------
+
+            function updateSlides() {
+
+                var slides = carousel.querySelectorAll(
+                    '.slick__slide:not(.slick-cloned)'
+                );
+
+                var total = slides.length;
+
+                slides.forEach(function (slide, index) {
+
+                    var content =
+                        slide.querySelector('.paragraph') ||
+                        slide.querySelector('[role="group"]') ||
+                        slide;
+
+                    //--------------------------------------------
+                    // Slide Role
+                    //--------------------------------------------
+
+                    content.setAttribute('role', 'group');
+                    content.setAttribute('aria-roledescription', 'slide');
+                    content.setAttribute(
+                        'aria-label',
+                        (index + 1) + ' of ' + total
+                    );
+
+                    //--------------------------------------------
+                    // Active Slide
+                    //--------------------------------------------
+
+                    var active = slide.classList.contains('slick-active');
+
+                    content.setAttribute(
+                        'aria-hidden',
+                        active ? 'false' : 'true'
+                    );
+
+                    //--------------------------------------------
+                    // Links
+                    //--------------------------------------------
+
+                    slide.querySelectorAll('a').forEach(function (link) {
+
+                        if (active) {
+                            // Native links don't need tabindex="0"
+                            if (link.getAttribute('tabindex') === '0') {
+                                link.removeAttribute('tabindex');
+                            }
+                        } else {
+                            link.setAttribute('tabindex', '-1');
+                        }
+
+                    });
+
+                });
+
+                //------------------------------------------------
+                // Hide cloned slides
+                //------------------------------------------------
+
+                carousel.querySelectorAll('.slick-cloned').forEach(function (clone) {
+
+                    clone.setAttribute('aria-hidden', 'true');
+
+                    clone.querySelectorAll('a').forEach(function (link) {
+                        link.setAttribute('tabindex', '-1');
+                    });
+
+                });
+
+            }
+
+            updateSlides();
+
+            //----------------------------------------------------
+            // Observe class changes from Slick
+            //----------------------------------------------------
+
+            var observer = new MutationObserver(function () {
+                updateSlides();
+            });
+
+            carousel.querySelectorAll('.slick__slide').forEach(function (slide) {
+
+                observer.observe(slide, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+
+            });
+
+        });
+
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCarouselAccessibility);
+    } else {
+        initCarouselAccessibility();
+    }
+
+})();
+```
+
+### This script covers all requested fixes
+
+| Issue                                  | Fixed |
+| -------------------------------------- | :---: |
+| `role="region"`                        |   ✅   |
+| `aria-roledescription="carousel"`      |   ✅   |
+| Accessible `aria-label`                |   ✅   |
+| Correct slide labels (`1 of 3`, etc.)  |   ✅   |
+| Dynamic `aria-hidden`                  |   ✅   |
+| `aria-live="polite"`                   |   ✅   |
+| `aria-atomic="false"`                  |   ✅   |
+| Remove unnecessary `tabindex="0"`      |   ✅   |
+| Keep `tabindex="-1"` on inactive links |   ✅   |
+| Supports Slick slide changes           |   ✅   |
+| Drupal JS Injector compatible          |   ✅   |
+
+This script is suitable for your **Zelle Drupal Slick Carousel** implementation and addresses the accessibility issues you listed without modifying the HTML templates.
+
+
+
+*****************************************************************************************
+
 (function () {
 
     // Prevent duplicate initialization
