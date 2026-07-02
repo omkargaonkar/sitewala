@@ -1,3 +1,19 @@
+Comment :
+
+Implemented accessibility improvements for the Slick carousel to align with the WCAG acceptance criteria.
+
+Completed fixes:
+
+Added role="region" to the carousel container.
+Added aria-roledescription="carousel" to the carousel container.
+Added an accessible aria-label to the carousel container (without using the word "carousel").
+Updated slide labels dynamically to announce the correct position (e.g., "1 of 3", "2 of 3").
+Implemented dynamic aria-hidden management so only the active slide is exposed to assistive technologies.
+Added aria-live="polite" and aria-atomic="false" to the slide wrapper for appropriate screen reader announcements.
+Removed unnecessary tabindex="0" from active links while maintaining tabindex="-1" for inactive slide links.
+Ensured accessibility attributes are updated automatically on every Slick slide change.
+Hidden cloned Slick slides from assistive technologies to prevent duplicate announcements.
+
 ******************************************************************************************
 DPM-22797
 **************************************************************************************
