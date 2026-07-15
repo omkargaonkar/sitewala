@@ -1,3 +1,104 @@
+Implemented a JavaScript fix to ensure aria-describedby only references valid IDs. Invalid references are removed and restored dynamically when validation messages are available, resolving the accessibility issue.
+
+Yes. If you're restricted to using the **Drupal JS Injector**, you can fix the issue by:
+
+* Removing `aria-describedby` when the referenced ID does **not** exist.
+* Restoring `aria-describedby` automatically when the validation message is added to the DOM.
+* Watching for DOM changes so it works with Eloqua validation.
+
+### Drupal JS Injector
+
+```javascript
+(function () {
+
+  if (window.ariaDescribedByFixInitialized) return;
+  window.ariaDescribedByFixInitialized = true;
+
+  function updateAriaDescribedBy() {
+
+    document.querySelectorAll('[aria-describedby]').forEach(function (field) {
+
+      var describedBy = field.getAttribute('aria-describedby');
+
+      if (!describedBy) return;
+
+      var ids = describedBy.trim().split(/\s+/);
+      var validIds = [];
+
+      ids.forEach(function (id) {
+        if (document.getElementById(id)) {
+          validIds.push(id);
+        }
+      });
+
+      if (validIds.length) {
+        field.setAttribute('aria-describedby', validIds.join(' '));
+      } else {
+        field.removeAttribute('aria-describedby');
+      }
+
+    });
+
+  }
+
+  // Initial check
+  updateAriaDescribedBy();
+
+  // Watch for validation messages added by Eloqua
+  new MutationObserver(function () {
+    updateAriaDescribedBy();
+  }).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+```
+
+### What this fixes
+
+Before validation:
+
+```html
+<input aria-describedby="error_lastName">
+```
+
+❌ `error_lastName` does not exist
+
+↓
+
+JS changes it to:
+
+```html
+<input>
+```
+
+When Eloqua adds:
+
+```html
+<span id="error_lastName">
+Please provide your last name.
+</span>
+```
+
+↓
+
+JS automatically changes it back to:
+
+```html
+<input aria-describedby="error_lastName">
+```
+
+### Why this is a good solution
+
+* ✅ Works for all Eloqua forms.
+* ✅ No hardcoded field names.
+* ✅ Supports multiple IDs in `aria-describedby`.
+* ✅ Fixes the accessibility scan by ensuring `aria-describedby` only references IDs that actually exist.
+* ✅ Can be added once in the Drupal JS Injector and reused across all forms.
+********************************************************************************************************************************************************************************************************************************************************
+
+
 DPM-23000
 ***************************
 Since **both issues are the same accessibility rule** (focusable elements inside `aria-hidden="true"`), **don't add two separate scripts**. That can cause duplicate MutationObservers and unnecessary processing.
