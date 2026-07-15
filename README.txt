@@ -1,5 +1,7 @@
 DPM-22998
 
+Added a Drupal JS accessibility fix for image-only blog links that were missing an accessible name. The script detects the affected blog link and programmatically adds an appropriate aria-label ("Online Checkout Report"), ensuring the link has a clear accessible name for screen reader users while preserving the existing visual presentation.
+
 (function () {
 
     if (window.blogLinkAccessibilityFix) return;
