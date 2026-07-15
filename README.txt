@@ -1,5 +1,77 @@
 DPM-23000
 
+(function () {
+
+  if (window.slickAriaHiddenSlidesFix) return;
+  window.slickAriaHiddenSlidesFix = true;
+
+  function updateSlides() {
+
+    document.querySelectorAll('.slick__slide, .slick-slide').forEach(function (slide) {
+
+      var hidden = slide.getAttribute('aria-hidden') === 'true';
+
+      // Remove slide itself from tab order
+      slide.setAttribute('tabindex', hidden ? '-1' : '0');
+
+      // Update all focusable descendants
+      slide.querySelectorAll(
+        'a[href], button, input, select, textarea, [tabindex]'
+      ).forEach(function (el) {
+
+        if (hidden) {
+
+          if (!el.hasAttribute('data-original-tabindex')) {
+            el.setAttribute(
+              'data-original-tabindex',
+              el.hasAttribute('tabindex') ? el.getAttribute('tabindex') : ''
+            );
+          }
+
+          el.setAttribute('tabindex', '-1');
+
+        } else {
+
+          if (el.hasAttribute('data-original-tabindex')) {
+
+            var original = el.getAttribute('data-original-tabindex');
+
+            if (original === '') {
+              el.removeAttribute('tabindex');
+            } else {
+              el.setAttribute('tabindex', original);
+            }
+
+            el.removeAttribute('data-original-tabindex');
+
+          } else {
+
+            el.removeAttribute('tabindex');
+
+          }
+
+        }
+
+      });
+
+    });
+
+  }
+
+  updateSlides();
+
+  document.querySelectorAll('.slick-slider, .slick-track').forEach(function (slider) {
+
+    new MutationObserver(updateSlides).observe(slider, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-hidden', 'class']
+    });
+
+  });
+
+})();
+
 Implemented a JavaScript fix to remove hidden (aria-hidden="true") carousel content from the keyboard tab order and restore focusability when slides become visible. This resolves the accessibility issue for focusable elements within aria-hidden="true" on the Homepage and Shoppers Page.
 
 Based on the HTML you shared, the issue is caused by **Slick Slider**. 
