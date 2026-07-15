@@ -1,3 +1,43 @@
+DPM-22998
+
+(function () {
+
+    if (window.blogLinkAccessibilityFix) return;
+    window.blogLinkAccessibilityFix = true;
+
+    document.querySelectorAll('a[href]').forEach(function (link) {
+
+        // Skip if link already has an accessible name
+        if (
+            link.hasAttribute('aria-label') ||
+            link.hasAttribute('aria-labelledby') ||
+            link.textContent.trim() !== ""
+        ) {
+            return;
+        }
+
+        var img = link.querySelector('img');
+
+        if (!img) return;
+
+        // Add accessible name based on destination
+        if (link.href.includes('/blog/online-checkout-report-trust-and-security')) {
+
+            link.setAttribute(
+                'aria-label',
+                'Online Checkout Report – Trust and Security'
+            );
+
+        }
+
+    });
+
+})();
+
+
+*********************************************************************************
+********************************************************************************
+
 Comment :
 
 Implemented accessibility improvements for the Slick carousel to align with the WCAG acceptance criteria.
