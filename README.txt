@@ -1,4 +1,100 @@
 DPM-23000
+***************************
+Since **both issues are the same accessibility rule** (focusable elements inside `aria-hidden="true"`), **don't add two separate scripts**. That can cause duplicate MutationObservers and unnecessary processing.
+
+Instead, use **one combined JS Injector** that handles **both `.slick-slide` and `.slick__slide`** carousels across your Drupal site.
+
+### Combined Drupal JS Injector
+
+```javascript
+(function () {
+
+  if (window.slickAriaHiddenFixInitialized) return;
+  window.slickAriaHiddenFixInitialized = true;
+
+  function updateAccessibility() {
+
+    document.querySelectorAll('.slick-slide, .slick__slide').forEach(function (slide) {
+
+      var isHidden = slide.getAttribute('aria-hidden') === 'true';
+
+      // Make the slide itself non-focusable when hidden
+      slide.setAttribute('tabindex', isHidden ? '-1' : '0');
+
+      // Update all focusable elements inside the slide
+      slide.querySelectorAll(
+        'a[href], button, input, select, textarea, details, audio[controls], video[controls], [tabindex]'
+      ).forEach(function (el) {
+
+        if (isHidden) {
+
+          if (!el.hasAttribute('data-original-tabindex')) {
+            el.setAttribute(
+              'data-original-tabindex',
+              el.hasAttribute('tabindex') ? el.getAttribute('tabindex') : ''
+            );
+          }
+
+          el.setAttribute('tabindex', '-1');
+
+        } else {
+
+          if (el.hasAttribute('data-original-tabindex')) {
+
+            var original = el.getAttribute('data-original-tabindex');
+
+            if (original === '') {
+              el.removeAttribute('tabindex');
+            } else {
+              el.setAttribute('tabindex', original);
+            }
+
+            el.removeAttribute('data-original-tabindex');
+
+          } else if (
+            el.matches('a[href], button, input, select, textarea, details, audio[controls], video[controls]')
+          ) {
+
+            el.removeAttribute('tabindex');
+
+          }
+
+        }
+
+      });
+
+    });
+
+  }
+
+  // Initial run
+  updateAccessibility();
+
+  // Observe all Slick carousels
+  document.querySelectorAll('.slick-slider, .slick-track').forEach(function (slider) {
+
+    new MutationObserver(updateAccessibility).observe(slider, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-hidden', 'class']
+    });
+
+  });
+
+})();
+```
+
+### Why use one script?
+
+* ✅ One JS Injector for all pages.
+* ✅ Handles both `.slick-slide` and `.slick__slide`.
+* ✅ Covers Homepage, Shoppers Page, Merchant Carousel, and any other Slick carousel.
+* ✅ Prevents duplicate observers and duplicate execution.
+* ✅ Easier to maintain in Drupal.
+
+**This is the approach I recommend instead of pasting two separate JS snippets into the Drupal JS Injector.**
+
+**************************
 
 (function () {
 
