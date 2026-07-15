@@ -1,3 +1,135 @@
+DPM-23034
+Resolved the aria-describedby invalid ID accessibility issue on the Contact Sales form. Ensured that every aria-describedby attribute references a valid element in the DOM by creating missing error message containers for fields that did not have corresponding IDs. Existing valid references were left unchanged. This ensures screen readers can correctly associate descriptive/error text with each form control and addresses the WCAG requirement for valid aria-describedby references.
+
+Based on your HTML, the issue is that these IDs are missing at page load:
+
+* `error_lastName`
+* `error_mobilePhone`
+* `error_emailAddress`
+* `error_company`
+* `error_title`
+
+Since you are using a **Drupal JS Injector**, the best approach is to create the missing elements only if they don't already exist.
+
+```javascript
+(function () {
+
+  // Prevent duplicate execution
+  if (window.fixAriaDescribedbyInvalidIds) return;
+  window.fixAriaDescribedbyInvalidIds = true;
+
+  function fixAriaDescribedby() {
+
+    document.querySelectorAll('input[aria-describedby]').forEach(function (input) {
+
+      var describedBy = input.getAttribute('aria-describedby');
+      if (!describedBy) return;
+
+      describedBy.trim().split(/\s+/).forEach(function (id) {
+
+        // Skip if referenced element already exists
+        if (document.getElementById(id)) return;
+
+        // Create hidden placeholder
+        var errorMessage = document.createElement('span');
+        errorMessage.id = id;
+        errorMessage.className = 'LV_validation_message';
+        errorMessage.setAttribute('role', 'alert');
+        errorMessage.setAttribute('aria-live', 'polite');
+        errorMessage.hidden = true;
+        errorMessage.textContent = '';
+
+        // Insert immediately after the field wrapper
+        var wrapper = input.closest('.field-control-wrapper');
+
+        if (wrapper) {
+          wrapper.insertAdjacentElement('afterend', errorMessage);
+        } else {
+          input.insertAdjacentElement('afterend', errorMessage);
+        }
+
+      });
+
+    });
+
+  }
+
+  // Initial execution
+  fixAriaDescribedby();
+
+  // Re-run if the form is dynamically updated
+  var observer = new MutationObserver(function () {
+    fixAriaDescribedby();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+})();
+```
+
+### What this fixes
+
+If your HTML is:
+
+```html
+<input
+    id="fe215"
+    aria-describedby="error_lastName">
+```
+
+and there is **no** element with:
+
+```html
+id="error_lastName"
+```
+
+the script creates:
+
+```html
+<span
+    id="error_lastName"
+    class="LV_validation_message"
+    role="alert"
+    aria-live="polite"
+    hidden>
+</span>
+```
+
+It does the same for:
+
+* `error_mobilePhone`
+* `error_emailAddress`
+* `error_company`
+* `error_title`
+
+### Important
+
+This fixes the specific accessibility rule **only if the problem is that the referenced IDs are missing**.
+
+However, if the accessibility scanner is running **before your form or validation library finishes rendering**, or if the validation library later removes/replaces these elements, then the real fix should be made in the form template or validation code rather than by JavaScript injection.
+
+**Before deploying this**, verify by running in the browser console after page load:
+
+```javascript
+document.querySelectorAll('[id^="error_"]')
+```
+
+If you now see all of the following IDs:
+
+* `error_firstName`
+* `error_lastName`
+* `error_mobilePhone`
+* `error_emailAddress`
+* `error_company`
+* `error_title`
+
+then the `aria-describedby` references are valid and this specific WCAG issue should be resolved.
+
+*************************************************************************************************
+
 DPM-22998
 
 Added a Drupal JS accessibility fix for image-only blog links that were missing an accessible name. The script detects the affected blog link and programmatically adds an appropriate aria-label ("Online Checkout Report"), ensuring the link has a clear accessible name for screen reader users while preserving the existing visual presentation.
