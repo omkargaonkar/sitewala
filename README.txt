@@ -1,3 +1,170 @@
+DPM-23000
+
+Implemented a JavaScript fix to remove hidden (aria-hidden="true") carousel content from the keyboard tab order and restore focusability when slides become visible. This resolves the accessibility issue for focusable elements within aria-hidden="true" on the Homepage and Shoppers Page.
+
+Based on the HTML you shared, the issue is caused by **Slick Slider**. 
+
+For example, there are slides like:
+
+```html
+<div class="slick__slide" aria-hidden="true" tabindex="0">
+```
+
+and inside them are focusable links:
+
+```html
+<a href="..." tabindex="0">
+```
+
+This violates WCAG because **elements hidden from assistive technology (`aria-hidden="true"`) must not be keyboard focusable.** 
+
+---
+
+## Drupal JS Injector Fix
+
+This code automatically:
+
+* ✅ Finds every `.slick__slide`
+* ✅ Checks `aria-hidden`
+* ✅ If `aria-hidden="true"`
+
+  * removes all focusable elements from keyboard (`tabindex="-1"`)
+* ✅ If `aria-hidden="false"`
+
+  * restores focusability
+* ✅ Works after Slick changes slides
+* ✅ Uses MutationObserver so it continues working
+* ✅ Prevents duplicate execution
+* ✅ Covers Homepage and Shoppers Page
+
+```javascript
+(function () {
+
+  if (window.slickAriaHiddenFixInitialized) return;
+  window.slickAriaHiddenFixInitialized = true;
+
+  function updateHiddenSlides() {
+
+    document.querySelectorAll('.slick__slide').forEach(function (slide) {
+
+      var isHidden = slide.getAttribute('aria-hidden') === 'true';
+
+      var focusable = slide.querySelectorAll(
+        'a[href], button, input, select, textarea, details, audio[controls], video[controls], [tabindex]'
+      );
+
+      focusable.forEach(function (el) {
+
+        if (isHidden) {
+
+          // Save original tabindex
+          if (!el.hasAttribute('data-original-tabindex')) {
+            el.setAttribute(
+              'data-original-tabindex',
+              el.hasAttribute('tabindex') ? el.getAttribute('tabindex') : ''
+            );
+          }
+
+          el.setAttribute('tabindex', '-1');
+
+        } else {
+
+          if (el.hasAttribute('data-original-tabindex')) {
+
+            var original = el.getAttribute('data-original-tabindex');
+
+            if (original === '') {
+              el.removeAttribute('tabindex');
+            } else {
+              el.setAttribute('tabindex', original);
+            }
+
+            el.removeAttribute('data-original-tabindex');
+
+          } else {
+
+            if (
+              el.matches('a[href], button, input, select, textarea')
+            ) {
+              el.removeAttribute('tabindex');
+            }
+
+          }
+
+        }
+
+      });
+
+    });
+
+  }
+
+  // Initial run
+  updateHiddenSlides();
+
+  // Observe aria-hidden changes from Slick
+  document.querySelectorAll('.slick-slider, .slick-track').forEach(function (slider) {
+
+    new MutationObserver(function () {
+      updateHiddenSlides();
+    }).observe(slider, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['aria-hidden', 'class']
+    });
+
+  });
+
+})();
+```
+
+---
+
+## Why this fixes the issue
+
+When Slick marks a slide as:
+
+```html
+<div aria-hidden="true">
+```
+
+all interactive elements inside become:
+
+```html
+<a tabindex="-1">
+<button tabindex="-1">
+<input tabindex="-1">
+<select tabindex="-1">
+```
+
+When the slide becomes visible again:
+
+```html
+aria-hidden="false"
+```
+
+their original keyboard behavior is restored automatically.
+
+---
+
+### This covers the accessibility rule
+
+✔ No focusable element inside `aria-hidden="true"` content
+
+✔ Hidden slides removed from keyboard navigation
+
+✔ Visible slides remain keyboard accessible
+
+✔ Works dynamically with Slick Carousel
+
+✔ Meets the WCAG requirement for **Focusable element with `aria-hidden="true"`**.
+
+This solution is more robust than simply targeting `<a>` elements because it covers **all interactive controls** (links, buttons, inputs, selects, textareas, audio/video controls, and any element with a `tabindex`) that could trigger this accessibility violation.
+
+
+************************************************************************************************
+
+
 DPM-23034
 Resolved the aria-describedby invalid ID accessibility issue on the Contact Sales form. Ensured that every aria-describedby attribute references a valid element in the DOM by creating missing error message containers for fields that did not have corresponding IDs. Existing valid references were left unchanged. This ensures screen readers can correctly associate descriptive/error text with each form control and addresses the WCAG requirement for valid aria-describedby references.
 
