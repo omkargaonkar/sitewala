@@ -1,3 +1,15 @@
+
+Hi [Manager’s Name],
+
+I checked the current sprint assignments in Jira and noticed that I’ve been assigned 6 story points, while Shraddha has been assigned 12 story points.
+
+I have additional bandwidth this sprint, so I’d be happy to take on some of her tasks if that helps balance the workload.
+
+
+
+
+
+
 Implemented a JavaScript fix to ensure aria-describedby only references valid IDs. Invalid references are removed and restored dynamically when validation messages are available, resolving the accessibility issue.
 
 Yes. If you're restricted to using the **Drupal JS Injector**, you can fix the issue by:
