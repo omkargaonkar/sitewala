@@ -1,4 +1,8 @@
 
+The reported accessibility issue has been resolved. The focus indicator now meets the WCAG requirement with a contrast ratio greater than 3:1. Ready for QA verification.
+
+
+
 .paragraph-body p a.cta_link:focus,
 .paragraph-body p a.cta_link:focus-visible {
     box-shadow: 0 0 0 .25rem rgba(36,51,77,.6) !important;
