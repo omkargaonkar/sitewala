@@ -1,3 +1,23 @@
+(function () {
+  document.querySelectorAll('.social-media-links--platforms a').forEach(function (link) {
+    if (!link.hasAttribute('aria-label') || !link.getAttribute('aria-label').trim()) {
+
+      if (link.classList.contains('social-media-link-icon--tiktok')) {
+        link.setAttribute('aria-label', 'Follow Zelle on TikTok');
+      } else if (link.classList.contains('social-media-link-icon--twitter')) {
+        link.setAttribute('aria-label', 'Follow Zelle on X');
+      } else if (link.classList.contains('social-media-link-icon--youtube')) {
+        link.setAttribute('aria-label', 'Subscribe to Zelle on YouTube');
+      }
+
+      // Optional: keep tooltip consistent
+      link.setAttribute('title', link.getAttribute('aria-label'));
+    }
+  });
+})();
+
+
+
 
 The reported accessibility issue has been resolved. The focus indicator now meets the WCAG requirement with a contrast ratio greater than 3:1. Ready for QA verification.
 
