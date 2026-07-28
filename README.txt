@@ -1,4 +1,14 @@
 
+.paragraph-body p a.cta_link:focus,
+.paragraph-body p a.cta_link:focus-visible {
+    box-shadow: 0 0 0 .25rem rgba(36,51,77,.6) !important;
+}
+
+
+
+
+
+
 Hi [Manager’s Name],
 
 I checked the current sprint assignments in Jira and noticed that I’ve been assigned 6 story points, while Shraddha has been assigned 12 story points.
