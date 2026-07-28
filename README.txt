@@ -1,3 +1,7 @@
+Added meaningful aria-label attributes to social media icon links that were missing accessible names (TikTok, X, and YouTube). Verified that all social media links now expose descriptive accessible names for screen reader users, meeting the accessibility requirement for link purpose.
+
+
+
 (function () {
   document.querySelectorAll('.social-media-links--platforms a').forEach(function (link) {
     if (!link.hasAttribute('aria-label') || !link.getAttribute('aria-label').trim()) {
