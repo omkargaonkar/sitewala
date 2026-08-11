@@ -1,4 +1,8 @@
 DPM-22569
+
+Implemented the accessibility fix for the dynamic Thank You message with live-region attributes. The confirmation message is now announced by screen readers and can be accessed using the Up/Down Arrow keys during screen-reader navigation
+
+
 (function () {
   'use strict';
 
