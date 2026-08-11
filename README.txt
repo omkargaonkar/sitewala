@@ -1,3 +1,41 @@
+DPM -22587
+
+Removed unnecessary role="group" and aria-label attributes from the Swiper slides using JavaScript to resolve the invalid ARIA attributes issue.
+
+(function () {
+  'use strict';
+
+  function fixSwiperSlides() {
+    document.querySelectorAll('.swiper-slide').forEach(function (slide) {
+      slide.removeAttribute('role');
+      slide.removeAttribute('aria-label');
+    });
+  }
+
+  // Run after page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixSwiperSlides);
+  } else {
+    fixSwiperSlides();
+  }
+
+  // Keep the fix applied if Swiper dynamically updates/recreates slides
+  const observer = new MutationObserver(function () {
+    fixSwiperSlides();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+
+
+
+
+
+
+
 DPM-22569
 
 Implemented the accessibility fix for the dynamic Thank You message with live-region attributes. The confirmation message is now announced by screen readers and can be accessed using the Up/Down Arrow keys during screen-reader navigation
