@@ -1,3 +1,108 @@
+DPM - 22584
+
+
+Fixed pagination accessibility using JavaScript by adding proper navigation labeling, descriptive page/previous/next link names, aria-current="page", and keyboard accessibility.
+
+
+(function () {
+  'use strict';
+
+  function fixPagination() {
+    const pagination = document.querySelector('.w-pagination-wrapper.pagination');
+
+    if (!pagination) return;
+
+    // Make sure pagination is identified as navigation
+    pagination.setAttribute('role', 'navigation');
+    pagination.setAttribute('aria-label', 'Pagination');
+
+    // Previous link
+    const previous = pagination.querySelector('.w-pagination-previous');
+
+    if (previous) {
+      previous.setAttribute('aria-label', 'Go to previous page');
+
+      // Keep disabled previous link out of keyboard navigation
+      if (previous.getAttribute('aria-disabled') === 'true') {
+        previous.setAttribute('tabindex', '-1');
+      } else {
+        previous.setAttribute('tabindex', '0');
+      }
+    }
+
+    // Next link
+    const next = pagination.querySelector('.w-pagination-next');
+
+    if (next) {
+      next.setAttribute('aria-label', 'Go to next page');
+
+      if (next.getAttribute('aria-disabled') === 'true') {
+        next.setAttribute('tabindex', '-1');
+      } else {
+        next.setAttribute('tabindex', '0');
+      }
+    }
+
+    // Page number links
+    const pageLinks = pagination.querySelectorAll(
+      'a[fs-list-element="page-button"]'
+    );
+
+    pageLinks.forEach(function (link) {
+      const pageNumber = link.textContent.trim();
+
+      if (pageNumber) {
+        link.setAttribute('aria-label', 'Go to page ' + pageNumber);
+      }
+
+      // Only the current page gets aria-current
+      if (link.classList.contains('w--current')) {
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+
+      // Ensure page links are keyboard accessible
+      link.setAttribute('tabindex', '0');
+    });
+
+    // Page count
+    const pageCount = pagination.querySelector('.w-page-count');
+
+    if (pageCount) {
+      pageCount.setAttribute('role', 'status');
+      pageCount.setAttribute('aria-live', 'polite');
+      pageCount.setAttribute('aria-label', pageCount.textContent.trim());
+    }
+  }
+
+  // Initial load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixPagination);
+  } else {
+    fixPagination();
+  }
+
+  // Handle dynamically updated pagination
+  const observer = new MutationObserver(function () {
+    fixPagination();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+
+
+
+
+
+
+
+
+
+
 DPM -22587
 
 Removed unnecessary role="group" and aria-label attributes from the Swiper slides using JavaScript to resolve the invalid ARIA attributes issue.
