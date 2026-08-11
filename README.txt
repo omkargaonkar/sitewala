@@ -1,3 +1,80 @@
+DPM-22582
+
+Fixed dropdown keyboard focus order by automatically collapsing the dropdown when focus moves outside and supporting Esc to close and return focus to the toggle.
+
+(function () {
+  'use strict';
+
+  function setupDropdown(dropdown) {
+    const toggle = dropdown.querySelector('.resource-dropdown-toggle');
+    const menu = dropdown.querySelector('.resource-dropdown-navigation');
+
+    if (!toggle || !menu) return;
+
+    // Handle keyboard focus leaving the open dropdown
+    dropdown.addEventListener('focusout', function (event) {
+      setTimeout(function () {
+        const activeElement = document.activeElement;
+
+        // If focus has moved outside the dropdown, close it
+        if (!dropdown.contains(activeElement)) {
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.classList.remove('w--open');
+          menu.classList.remove('w--open');
+        }
+      }, 0);
+    });
+
+    // Close dropdown when Escape is pressed
+    dropdown.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.classList.remove('w--open');
+        menu.classList.remove('w--open');
+
+        toggle.focus();
+      }
+    });
+  }
+
+  function initializeDropdowns() {
+    document
+      .querySelectorAll('.resource-filter-dropdown')
+      .forEach(function (dropdown) {
+        if (dropdown.dataset.a11yDropdownInitialized === 'true') return;
+
+        dropdown.dataset.a11yDropdownInitialized = 'true';
+        setupDropdown(dropdown);
+      });
+  }
+
+  // Initial setup
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDropdowns);
+  } else {
+    initializeDropdowns();
+  }
+
+  // Handle dynamically rendered dropdowns
+  const observer = new MutationObserver(function () {
+    initializeDropdowns();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+
+
+
+
+
+
+
+
+
+
 DPM - 22584
 
 
