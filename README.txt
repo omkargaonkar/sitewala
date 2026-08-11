@@ -1,3 +1,53 @@
+DPM-22565
+
+Fixed insufficiently descriptive “Learn More” links by adding contextual aria-label values based on the associated card heading, improving screen reader clarity.
+
+(function () {
+  'use strict';
+
+  function fixLearnMoreLinks() {
+    document.querySelectorAll('a.link-with-arrow').forEach(function (link) {
+      const text = link.textContent.trim();
+
+      if (text.toLowerCase() !== 'learn more') return;
+
+      // Find the nearest card/container heading
+      const container = link.closest('.w-dyn-item, article, section');
+
+      if (!container) return;
+
+      const heading = container.querySelector('h1, h2, h3, h4, h5, h6');
+
+      if (heading) {
+        const title = heading.textContent.trim();
+
+        if (title) {
+          link.setAttribute(
+            'aria-label',
+            'Learn More about ' + title
+          );
+        }
+      }
+    });
+  }
+
+  fixLearnMoreLinks();
+
+  // Handle dynamically loaded Webflow content
+  const observer = new MutationObserver(fixLearnMoreLinks);
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+
+
+
+
+
+
+
 DPM-22582
 
 Fixed dropdown keyboard focus order by automatically collapsing the dropdown when focus moves outside and supporting Esc to close and return focus to the toggle.
