@@ -1,3 +1,54 @@
+DPM-22569
+(function () {
+  'use strict';
+
+  function fixThankYouMessage() {
+    const thankYou = document.querySelector('.thank-you-section-inner');
+
+    if (!thankYou) return;
+
+    // Make the dynamically updated content accessible
+    thankYou.setAttribute('role', 'status');
+    thankYou.setAttribute('aria-live', 'polite');
+    thankYou.setAttribute('aria-atomic', 'true');
+
+    // Make the container programmatically focusable
+    thankYou.setAttribute('tabindex', '-1');
+
+    // Move screen-reader focus to the confirmation message
+    setTimeout(function () {
+      thankYou.focus({ preventScroll: true });
+    }, 100);
+  }
+
+  // Initial check
+  fixThankYouMessage();
+
+  // Detect dynamically inserted/replaced content
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      if (mutation.type === 'childList') {
+        const thankYou = document.querySelector('.thank-you-section-inner');
+
+        if (thankYou) {
+          fixThankYouMessage();
+        }
+      }
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+})();
+
+
+
+
+
+
+
 Added meaningful aria-label attributes to social media icon links that were missing accessible names (TikTok, X, and YouTube). Verified that all social media links now expose descriptive accessible names for screen reader users, meeting the accessibility requirement for link purpose.
 
 
