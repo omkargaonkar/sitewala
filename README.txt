@@ -1,3 +1,42 @@
+DPM-22567
+
+Fixed decorative image accessibility by setting alt="", ensuring the image is ignored by screen readers as required by the AC
+
+(function () {
+  'use strict';
+
+  // Decorative <img> elements
+  document.querySelectorAll('.page-hero-content-right-image').forEach(function (img) {
+    img.setAttribute('alt', '');
+  });
+
+  // Decorative inline SVG elements
+  document.querySelectorAll('.page-hero-content-right svg').forEach(function (svg) {
+    svg.setAttribute('aria-hidden', 'true');
+  });
+})();
+
+
+
+(function () {
+  'use strict';
+
+  // Decorative <img> elements
+  document.querySelectorAll('.page-hero-content-right-image').forEach(function (img) {
+    img.setAttribute('alt', '');
+  });
+
+  // Decorative inline SVG elements
+  document.querySelectorAll('.page-hero-content-right svg').forEach(function (svg) {
+    svg.setAttribute('aria-hidden', 'true');
+  });
+})();
+
+
+
+
+
+
 DPM-22566
 
 
