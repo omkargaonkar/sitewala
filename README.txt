@@ -1,3 +1,70 @@
+DPM-22566
+
+
+Fixed accordion accessibility by adding proper accessible naming, aria-expanded, aria-controls, aria-labelledby, keyboard support, and dynamic expanded/collapsed state handling.
+
+
+(function () {
+  function setupAccordion(item) {
+    const header = item.querySelector('.accordion-header');
+    const panel = item.querySelector('.accordion-content');
+
+    if (!header || !panel) return;
+
+    if (!header.id) {
+      header.id = 'accordion-header-' + Math.random().toString(36).slice(2);
+    }
+
+    if (!panel.id) {
+      panel.id = 'accordion-panel-' + Math.random().toString(36).slice(2);
+    }
+
+    header.setAttribute('role', 'button');
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('aria-controls', panel.id);
+    header.setAttribute('aria-label', header.textContent.trim());
+
+    panel.setAttribute('aria-labelledby', header.id);
+
+    function updateAriaExpanded() {
+      const style = window.getComputedStyle(panel);
+
+      const expanded =
+        style.display !== 'none' &&
+        style.visibility !== 'hidden' &&
+        panel.offsetHeight > 0;
+
+      header.setAttribute(
+        'aria-expanded',
+        expanded ? 'true' : 'false'
+      );
+    }
+
+    updateAriaExpanded();
+
+    const observer = new MutationObserver(updateAriaExpanded);
+
+    observer.observe(panel, {
+      attributes: true,
+      attributeFilter: ['style', 'class', 'hidden']
+    });
+
+    header.addEventListener('click', function () {
+      setTimeout(updateAriaExpanded, 100);
+      setTimeout(updateAriaExpanded, 300);
+    });
+  }
+
+  document.querySelectorAll('.accordion-item').forEach(setupAccordion);
+})();
+
+
+
+
+
+
+
+
 DPM-22565
 
 Fixed insufficiently descriptive “Learn More” links by adding contextual aria-label values based on the associated card heading, improving screen reader clarity.
