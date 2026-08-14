@@ -1,3 +1,32 @@
+Hi Team,
+
+Today is my last working day at EWS, and I want to take a moment to sincerely thank each one of you — Mischa, Taylor, Rupak, Matt, and Wayne.
+
+It has been a wonderful experience working with such a supportive and talented team. I’m truly grateful for all the guidance, support, knowledge, and great memories I’ve gained during my time here.
+
+A special thank you to Wayne for your guidance and support throughout my journey. I truly appreciate everything you’ve shared and taught me.
+
+I would also like to thank Mischa for giving me the opportunity to be part of this amazing team and for all the support and encouragement.
+
+I will always remember this team and the wonderful time we spent working together. Although today is my last working day at EWS, I hope this is not goodbye. Let’s definitely stay connected!
+
+You can always reach me at:
+
+📧 [omkargaonkar14@gmail.com](mailto:omkargaonkar14@gmail.com)
+🌐 omkargaonkar.com
+📱 +91 77099 02330
+
+Thank you once again for everything. It has been a pleasure working with all of you, and I wish the entire team continued success and happiness.
+
+Stay connected and keep in touch!
+
+Warm regards,
+Omkar Gaonkar
+
+
+
+
+
 DPM-23042
 
 Implemented a JS fix to remove invalid aria-* attributes from the Search button while preserving valid ARIA attributes. Verified against the accessibility acceptance criteria.
