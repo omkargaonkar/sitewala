@@ -19,6 +19,23 @@ Implemented a JS fix to remove invalid aria-* attributes from the Search button 
 })();
 
 
+(function () {
+  function fixSearch() {
+    var btn = document.getElementById('btn-search');
+    if (!btn) return;
+
+    btn.removeAttribute('aria-haspopup');
+    btn.removeAttribute('aria-expanded');
+  }
+
+  fixSearch();
+  setTimeout(fixSearch, 500);
+})();
+
+
+
+
+
 
 DPM-22567
 
