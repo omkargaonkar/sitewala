@@ -1,3 +1,25 @@
+DPM-23042
+
+Implemented a JS fix to remove invalid aria-* attributes from the Search button while preserving valid ARIA attributes. Verified against the accessibility acceptance criteria.
+
+(function () {
+  var button = document.getElementById('btn-search');
+
+  if (!button) return;
+
+  Array.from(button.attributes).forEach(function (attr) {
+    if (
+      attr.name.indexOf('aria-') === 0 &&
+      attr.name !== 'aria-haspopup' &&
+      attr.name !== 'aria-expanded'
+    ) {
+      button.removeAttribute(attr.name);
+    }
+  });
+})();
+
+
+
 DPM-22567
 
 Fixed decorative image accessibility by setting alt="", ensuring the image is ignored by screen readers as required by the AC
